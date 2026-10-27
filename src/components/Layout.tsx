@@ -6,18 +6,18 @@ import {
   FileText,
   Briefcase,
   Mic,
+  Crosshair,
   Globe,
   LogOut,
   Menu,
   X,
   Moon,
   Sun,
-  Map,
+  Compass,
   Settings,
-  Sparkles,
   ExternalLink
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { AnimatePresence, motion } from 'framer-motion';
 import { getUserStats } from '../lib/database';
 
 export default function Layout({ children }: { children: React.ReactNode }) {
@@ -32,7 +32,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     return true;
   });
   const [level, setLevel] = useState(1);
-  const [xp, setXp] = useState(120);
+  const [xp, setXp] = useState(0);
 
   useEffect(() => {
     if (isDark) {
@@ -57,8 +57,8 @@ export default function Layout({ children }: { children: React.ReactNode }) {
     { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },
     { name: 'Resume Analyzer', path: '/resume', icon: FileText },
     { name: 'Interview Simulator', path: '/interview', icon: Mic },
-    { name: 'Job Matcher', path: '/jobs', icon: Briefcase },
-    { name: 'Career Roadmap', path: '/roadmap', icon: Map },
+    { name: 'Job Matcher', path: '/jobs', icon: Crosshair },
+    { name: 'Career Roadmap', path: '/roadmap', icon: Compass },
     { name: 'Portfolio Builder', path: '/portfolio', icon: Globe },
     { name: 'Profile & Settings', path: '/settings', icon: Settings },
   ];
@@ -69,45 +69,42 @@ export default function Layout({ children }: { children: React.ReactNode }) {
   return (
     <div className="flex h-screen bg-background text-foreground overflow-hidden selection:bg-primary/20 selection:text-primary">
       {/* Desktop Sidebar */}
-      <aside className="hidden md:flex flex-col w-72 border-r border-border bg-card/60 backdrop-blur-2xl z-20 shrink-0">
+      <aside className="hidden md:flex flex-col w-64 border-r border-border bg-card z-20 shrink-0">
         {/* Brand */}
-        <div className="p-6 pb-5">
-          <Link to="/dashboard" className="flex items-center gap-3 font-bold text-2xl tracking-tight">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-purple-600 flex items-center justify-center text-white shadow-lg shadow-primary/20">
-              <Briefcase className="w-5 h-5" />
+        <div className="p-5 pb-4 border-b border-border/50">
+          <Link to="/dashboard" className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground font-bold">
+              <Briefcase className="w-4 h-4" />
             </div>
-            <span className="font-display font-extrabold text-foreground">
-              CareerBoost<span className="text-primary">.ai</span>
-            </span>
+            <div className="flex flex-col">
+              <span className="font-display font-bold text-base leading-tight tracking-tight text-foreground">
+                CareerBoost
+              </span>
+              <span className="text-[10px] font-mono text-muted-foreground uppercase tracking-wider">
+                Engineering Studio
+              </span>
+            </div>
           </Link>
         </div>
 
-        {/* Gamification Level Card */}
-        <div className="px-5 mb-5">
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-primary/10 via-purple-500/10 to-transparent border border-primary/20 space-y-2.5">
-            <div className="flex justify-between items-center text-xs font-bold">
-              <span className="text-primary flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" />
-                Level {level} Pro
-              </span>
-              <span className="text-muted-foreground">{xp % 100} / 100 XP</span>
+        {/* Minimal Level & Progression Pill */}
+        <div className="px-4 py-3 border-b border-border/40">
+          <div className="p-2.5 rounded-lg bg-muted/40 border border-border/60 space-y-1.5">
+            <div className="flex justify-between items-center text-[11px] font-mono">
+              <span className="font-semibold text-foreground">Level {level} Track</span>
+              <span className="text-muted-foreground">{xp % 100}/100 XP</span>
             </div>
-            <div className="h-2 bg-background/80 rounded-full overflow-hidden border border-border/50">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(Math.max(xp % 100, 8), 100)}%` }}
-                transition={{ duration: 0.8, ease: 'easeOut' }}
-                className="h-full bg-gradient-to-r from-primary to-purple-600 rounded-full"
+            <div className="h-1 bg-border rounded-full overflow-hidden">
+              <div
+                className="h-full bg-primary rounded-full transition-all duration-500"
+                style={{ width: `${Math.min(Math.max(xp % 100, 6), 100)}%` }}
               />
             </div>
-            <p className="text-[11px] text-muted-foreground">
-              {100 - (xp % 100)} XP to reach Level {level + 1}
-            </p>
           </div>
         </div>
 
         {/* Navigation */}
-        <nav className="flex-1 px-3 space-y-1 overflow-y-auto pb-4">
+        <nav className="flex-1 px-3 py-3 space-y-1 overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive =
@@ -118,16 +115,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
               <Link
                 key={item.path}
                 to={item.path}
-                className={`flex items-center gap-3 px-3.5 py-2.5 rounded-xl text-sm font-semibold transition-all relative ${
+                className={`flex items-center gap-2.5 px-3 py-2 rounded-lg text-xs font-semibold transition-colors ${
                   isActive
-                    ? 'text-primary bg-primary/10 border border-primary/20 shadow-sm'
-                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+                    ? 'text-primary bg-primary/10 border border-primary/20'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/50'
                 }`}
               >
                 <Icon className={`w-4 h-4 ${isActive ? 'text-primary' : 'text-muted-foreground'}`} />
                 <span>{item.name}</span>
                 {isActive && (
-                  <div className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
+                  <span className="ml-auto w-1.5 h-1.5 rounded-full bg-primary" />
                 )}
               </Link>
             );
@@ -135,29 +132,31 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         </nav>
 
         {/* User Card & Controls Footer */}
-        <div className="p-4 border-t border-border bg-card/80 space-y-3">
-          <div className="flex items-center justify-between gap-2 p-2 rounded-xl hover:bg-muted/40 transition-colors">
-            <Link to="/settings" className="flex items-center gap-2.5 overflow-hidden flex-1">
-              <div className="w-9 h-9 rounded-xl bg-primary/15 text-primary flex items-center justify-center font-bold text-xs shrink-0">
+        <div className="p-3 border-t border-border bg-card space-y-2">
+          <div className="flex items-center justify-between gap-2 p-1.5 rounded-lg hover:bg-muted/30 transition-colors">
+            <Link to="/settings" className="flex items-center gap-2 min-w-0 flex-1">
+              <div className="w-7 h-7 rounded-md bg-muted text-foreground flex items-center justify-center font-mono font-bold text-xs shrink-0">
                 {userInitials}
               </div>
               <div className="flex flex-col min-w-0">
-                <span className="text-xs font-bold truncate text-foreground">{displayName}</span>
-                <span className="text-[11px] text-muted-foreground truncate">{user?.email}</span>
+                <span className="text-xs font-semibold truncate text-foreground leading-tight">{displayName}</span>
+                <span className="text-[10px] font-mono text-muted-foreground truncate">{user?.email}</span>
               </div>
             </Link>
             <button
+              type="button"
               onClick={() => setIsDark(!isDark)}
               title="Toggle theme"
-              className="p-2 rounded-xl text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
+              className="p-1.5 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
             >
-              {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
+              {isDark ? <Sun className="w-3.5 h-3.5 text-amber-400" /> : <Moon className="w-3.5 h-3.5" />}
             </button>
           </div>
 
           <button
+            type="button"
             onClick={signOut}
-            className="flex items-center justify-center gap-2 px-3 py-2 w-full rounded-xl text-xs font-semibold text-destructive hover:bg-destructive/10 transition-colors"
+            className="flex items-center justify-center gap-1.5 px-3 py-1.5 w-full rounded-md text-xs font-medium text-destructive hover:bg-destructive/10 transition-colors"
           >
             <LogOut className="w-3.5 h-3.5" />
             Sign Out
@@ -167,14 +166,10 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
       {/* Main Content Area */}
       <div className="flex-1 flex flex-col h-screen overflow-hidden relative">
-        {/* Subtle background ambient radial blooms */}
-        <div className="absolute top-0 right-1/4 w-[500px] h-[350px] bg-primary/5 rounded-full blur-[140px] pointer-events-none -z-10" />
-        <div className="absolute bottom-0 left-1/3 w-[500px] h-[350px] bg-purple-500/5 rounded-full blur-[140px] pointer-events-none -z-10" />
-
         {/* Mobile Top Header */}
-        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-card/80 backdrop-blur-xl z-30">
-          <Link to="/dashboard" className="flex items-center gap-2 font-bold text-lg text-foreground">
-            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-white">
+        <header className="md:hidden flex items-center justify-between px-4 py-3 border-b border-border bg-card z-30">
+          <Link to="/dashboard" className="flex items-center gap-2 font-bold text-base text-foreground">
+            <div className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
               <Briefcase className="w-3.5 h-3.5" />
             </div>
             <span>CareerBoost</span>
@@ -182,14 +177,16 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
           <div className="flex items-center gap-1.5">
             <button
+              type="button"
               onClick={() => setIsDark(!isDark)}
-              className="p-2 rounded-xl text-muted-foreground hover:text-foreground"
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground"
             >
               {isDark ? <Sun className="w-4 h-4 text-amber-400" /> : <Moon className="w-4 h-4" />}
             </button>
             <button
+              type="button"
               onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 rounded-xl text-foreground hover:bg-muted"
+              className="p-1.5 rounded-lg text-foreground hover:bg-muted"
             >
               {isMobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
             </button>
@@ -200,17 +197,17 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         <AnimatePresence>
           {isMobileMenuOpen && (
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -6 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-[57px] left-0 right-0 bottom-0 bg-background/95 backdrop-blur-2xl z-50 p-5 md:hidden overflow-y-auto flex flex-col"
+              exit={{ opacity: 0, y: -6 }}
+              className="absolute top-[53px] left-0 right-0 bottom-0 bg-background z-50 p-4 md:hidden overflow-y-auto flex flex-col border-b border-border"
             >
-              <div className="mb-4 p-3 rounded-xl bg-primary/10 text-xs font-bold text-primary flex items-center justify-between">
-                <span>Level {level} Pro</span>
-                <span>{xp} Total XP</span>
+              <div className="mb-3 p-3 rounded-lg bg-muted/40 border border-border text-xs font-mono flex items-center justify-between">
+                <span className="font-semibold text-foreground">Level {level} Track</span>
+                <span className="text-muted-foreground">{xp} XP</span>
               </div>
 
-              <nav className="space-y-1.5 flex-1">
+              <nav className="space-y-1 flex-1">
                 {navItems.map((item) => {
                   const Icon = item.icon;
                   const isActive =
@@ -221,32 +218,33 @@ export default function Layout({ children }: { children: React.ReactNode }) {
                       key={item.path}
                       to={item.path}
                       onClick={() => setIsMobileMenuOpen(false)}
-                      className={`flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-colors ${
+                      className={`flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
                         isActive
-                          ? 'bg-primary text-white'
+                          ? 'bg-primary text-primary-foreground'
                           : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                       }`}
                     >
-                      <Icon className="w-5 h-5" />
+                      <Icon className="w-4 h-4" />
                       {item.name}
                     </Link>
                   );
                 })}
               </nav>
 
-              <div className="pt-4 border-t border-border mt-4 space-y-2">
+              <div className="pt-3 border-t border-border mt-3 space-y-2">
                 <Link
                   to="/"
                   onClick={() => setIsMobileMenuOpen(false)}
-                  className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground p-2"
+                  className="flex items-center gap-2 text-xs text-muted-foreground hover:text-foreground py-1"
                 >
-                  <ExternalLink className="w-4 h-4" /> View Public Landing Page
+                  <ExternalLink className="w-3.5 h-3.5" /> View Public Landing Page
                 </Link>
                 <button
+                  type="button"
                   onClick={signOut}
-                  className="w-full flex items-center justify-center gap-2 py-3 rounded-xl bg-destructive/10 text-destructive text-sm font-semibold hover:bg-destructive/20 transition-colors"
+                  className="w-full flex items-center justify-center gap-1.5 py-2.5 rounded-lg bg-destructive/10 text-destructive text-xs font-semibold hover:bg-destructive/20 transition-colors"
                 >
-                  <LogOut className="w-4 h-4" />
+                  <LogOut className="w-3.5 h-3.5" />
                   Sign Out
                 </button>
               </div>
@@ -256,7 +254,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
 
         {/* Scrollable Page Body */}
         <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto">
+          <div className="max-w-6xl mx-auto">
             {children}
           </div>
         </main>

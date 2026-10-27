@@ -75,7 +75,7 @@ export default function RoadmapGenerator() {
           // Generate initial roadmap
           const generated = generateRoadmap(targetRole, loadedSkills, completed);
           setActiveRoadmap({
-            id: `roadmap-${Date.now()}`,
+            id: crypto.randomUUID(),
             goal: targetRole,
             level: skillLevel,
             matchPercentage: generated.matchPercentage,
@@ -118,7 +118,7 @@ export default function RoadmapGenerator() {
     try {
       const roadmap = generateRoadmap(targetRole, userSkills, completedSkills);
       const entry: GeneratedRoadmap = {
-        id: `roadmap-${Date.now()}`,
+        id: crypto.randomUUID(),
         goal: targetRole,
         level: skillLevel,
         matchPercentage: roadmap.matchPercentage,
@@ -192,7 +192,7 @@ export default function RoadmapGenerator() {
     <div className="space-y-8 pb-12 max-w-6xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold font-display text-foreground">Personalized Career Roadmap</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Career Roadmap</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Structured phase-by-phase learning curriculum, practice projects, and verified engineering docs to reach your target role.
         </p>
@@ -201,8 +201,8 @@ export default function RoadmapGenerator() {
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Configuration Settings */}
         <div className="lg:col-span-4 space-y-6">
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-border space-y-5">
-            <h2 className="text-base font-bold font-display text-foreground flex items-center gap-2">
+          <div className="surface-card rounded-2xl p-5 sm:p-6 border border-border space-y-5">
+            <h2 className="text-sm sm:text-base font-semibold tracking-tight text-foreground flex items-center gap-2">
               <Target className="w-4 h-4 text-primary" />
               Target Role & Objectives
             </h2>
@@ -316,18 +316,18 @@ export default function RoadmapGenerator() {
 
           {/* Skill Gap Summary Card */}
           {activeRoadmap && (
-            <div className="glass-panel rounded-3xl p-6 border border-border space-y-3">
-              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+            <div className="surface-card rounded-2xl p-5 border border-border space-y-3">
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Priority Skill Gap Analysis
               </h3>
               <div className="space-y-2">
                 <div className="flex justify-between items-center text-xs">
                   <span>Stack Coverage</span>
-                  <span className="font-bold text-primary">{activeRoadmap.matchPercentage}%</span>
+                  <span className="font-bold text-primary font-mono">{activeRoadmap.matchPercentage}%</span>
                 </div>
                 <div className="h-2 bg-muted rounded-full overflow-hidden">
                   <div
-                    className="h-full bg-primary rounded-full"
+                    className="h-full bg-primary rounded-full transition-all duration-500"
                     style={{ width: `${activeRoadmap.matchPercentage}%` }}
                   />
                 </div>
@@ -354,19 +354,19 @@ export default function RoadmapGenerator() {
         {/* Right Column: Roadmap Progression & Phases */}
         <div className="lg:col-span-8 space-y-6">
           {/* Progress Overview Header */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="surface-card rounded-2xl p-5 sm:p-6 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
-              <span className="text-xs font-bold text-primary uppercase tracking-wider">Curriculum Path</span>
-              <h2 className="text-xl sm:text-2xl font-bold font-display text-foreground">{targetRole} Pathway</h2>
+              <span className="text-xs font-semibold text-primary uppercase tracking-wider">Curriculum Path</span>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{targetRole} Pathway</h2>
               <p className="text-xs text-muted-foreground mt-0.5">{careerGoal}</p>
             </div>
 
             <div className="flex items-center gap-4">
-              <div className="text-right">
-                <span className="text-2xl font-extrabold font-display text-emerald-500">
+              <div className="text-left sm:text-right">
+                <span className="text-2xl font-extrabold font-mono text-emerald-500">
                   {completedCount} / {totalCount}
                 </span>
-                <p className="text-[11px] text-muted-foreground font-semibold">Milestones Complete ({progressPercent}%)</p>
+                <p className="text-[11px] text-muted-foreground font-medium">Milestones Complete ({progressPercent}%)</p>
               </div>
             </div>
           </div>
@@ -376,20 +376,20 @@ export default function RoadmapGenerator() {
             {Object.entries(stepsByPhase).map(([phaseName, phaseSteps], phaseIdx) => (
               <div key={phaseName} className="space-y-4">
                 <div className="flex items-center gap-2.5">
-                  <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary text-xs font-bold flex items-center justify-center font-display">
+                  <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary text-xs font-bold flex items-center justify-center font-mono">
                     0{phaseIdx + 1}
                   </span>
-                  <h3 className="text-base font-bold font-display text-foreground">{phaseName}</h3>
+                  <h3 className="text-sm font-bold tracking-tight text-foreground">{phaseName}</h3>
                 </div>
 
                 <div className="space-y-4 pl-3.5 border-l-2 border-border/70 ml-3.5">
                   {phaseSteps.map((step) => (
                     <div
                       key={step.id}
-                      className={`p-5 rounded-2xl border transition-all space-y-3 ${
+                      className={`p-5 rounded-xl border transition-all space-y-3 ${
                         step.completed
                           ? 'bg-emerald-500/5 border-emerald-500/30'
-                          : 'glass-panel border-border/80'
+                          : 'surface-card border-border/80'
                       }`}
                     >
                       <div className="flex items-start justify-between gap-3">

@@ -261,19 +261,19 @@ export default function JobMatcher() {
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold font-display text-foreground">Intelligent Job Matcher</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Intelligent Job Matcher</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Analyze your resume and verified skills against real employer requirements with transparent gap explanations.
+            Analyze your profile and verified skills against real employer requirements with transparent gap explanations.
           </p>
         </div>
 
         {/* Mode switcher tabs */}
-        <div className="flex rounded-xl bg-muted/60 p-1 border border-border/60 text-xs font-bold w-fit">
+        <div className="flex rounded-lg bg-muted/60 p-1 border border-border/60 text-xs font-semibold w-fit">
           <button
             type="button"
             onClick={() => setActiveTab('curated')}
-            className={`px-3.5 py-1.5 rounded-lg transition-all ${
-              activeTab === 'curated' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            className={`px-3 py-1.5 rounded-md transition-all ${
+              activeTab === 'curated' ? 'bg-card text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Curated Database ({sampleJobs.length})
@@ -281,8 +281,8 @@ export default function JobMatcher() {
           <button
             type="button"
             onClick={() => setActiveTab('custom')}
-            className={`px-3.5 py-1.5 rounded-lg transition-all ${
-              activeTab === 'custom' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            className={`px-3 py-1.5 rounded-md transition-all ${
+              activeTab === 'custom' ? 'bg-card text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Custom Job Description
@@ -290,8 +290,8 @@ export default function JobMatcher() {
           <button
             type="button"
             onClick={() => setActiveTab('saved')}
-            className={`px-3.5 py-1.5 rounded-lg transition-all ${
-              activeTab === 'saved' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            className={`px-3 py-1.5 rounded-md transition-all ${
+              activeTab === 'saved' ? 'bg-card text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Saved Roles ({savedJobIds.length})
@@ -300,7 +300,7 @@ export default function JobMatcher() {
       </div>
 
       {/* Input Configuration Panel */}
-      <div className="glass-panel rounded-3xl p-6 sm:p-8 space-y-6 border border-border">
+      <div className="surface-card rounded-2xl p-6 sm:p-7 space-y-6 border border-border">
         {/* Resume Input & File Upload */}
         <div className="space-y-2">
           <div className="flex items-center justify-between">
@@ -483,29 +483,29 @@ export default function JobMatcher() {
 
       {/* Custom Match Result View */}
       {activeTab === 'custom' && customMatchResult && (
-        <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-primary/30 space-y-6">
+        <div className="surface-card rounded-2xl p-6 sm:p-7 border border-primary/30 space-y-6">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/50 pb-5">
             <div>
-              <span className="text-xs font-bold uppercase tracking-wider text-primary">Custom Analysis</span>
-              <h2 className="text-2xl font-bold font-display">{customMatchResult.job.title}</h2>
+              <span className="text-xs font-semibold uppercase tracking-wider text-primary">Custom Analysis</span>
+              <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{customMatchResult.job.title}</h2>
               <p className="text-xs text-muted-foreground">{customMatchResult.job.company}</p>
             </div>
-            <div className="text-center sm:text-right">
-              <span className="text-4xl font-extrabold font-display text-emerald-500">
+            <div className="text-left sm:text-right">
+              <span className="text-3xl sm:text-4xl font-extrabold text-emerald-500 font-mono">
                 {customMatchResult.score}%
               </span>
-              <p className="text-[11px] text-muted-foreground font-semibold">Overall Fit Score</p>
+              <p className="text-[11px] text-muted-foreground font-medium">Overall Compatibility</p>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-muted/40 text-xs space-y-2">
-            <span className="font-bold text-foreground">Why this is your match fit:</span>
+          <div className="p-4 rounded-xl bg-muted/40 text-xs space-y-1.5 border border-border/50">
+            <span className="font-semibold text-foreground">Fit Assessment:</span>
             <p className="text-muted-foreground leading-relaxed">{customMatchResult.matchExplanation}</p>
           </div>
 
           <div className="grid sm:grid-cols-2 gap-4">
-            <div className="p-4 rounded-2xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
-              <span className="text-xs font-bold text-emerald-500">Matched Competencies ({customMatchResult.matchedSkills.length})</span>
+            <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 space-y-2">
+              <span className="text-xs font-semibold text-emerald-500">Matched Competencies ({customMatchResult.matchedSkills.length})</span>
               <div className="flex flex-wrap gap-1.5">
                 {customMatchResult.matchedSkills.map((s) => (
                   <span key={s} className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-400 text-xs font-medium">
@@ -515,8 +515,8 @@ export default function JobMatcher() {
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-rose-500/10 border border-rose-500/20 space-y-2">
-              <span className="text-xs font-bold text-rose-500">Missing / Desired Skills ({customMatchResult.missingSkills.length})</span>
+            <div className="p-4 rounded-xl bg-rose-500/10 border border-rose-500/20 space-y-2">
+              <span className="text-xs font-semibold text-rose-500">Missing / Desired Skills ({customMatchResult.missingSkills.length})</span>
               <div className="flex flex-wrap gap-1.5">
                 {customMatchResult.missingSkills.map((s) => (
                   <span key={s} className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-400 text-xs font-medium">
@@ -532,15 +532,15 @@ export default function JobMatcher() {
       {/* Saved Jobs View */}
       {activeTab === 'saved' && (
         <div className="space-y-4">
-          <h2 className="text-lg font-bold font-display">Bookmarked Target Positions ({savedJobsList.length})</h2>
+          <h2 className="text-base font-bold tracking-tight text-foreground">Bookmarked Target Positions ({savedJobsList.length})</h2>
           {savedJobsList.length === 0 ? (
-            <div className="glass-panel rounded-3xl p-12 text-center text-muted-foreground space-y-2">
+            <div className="surface-card rounded-2xl p-12 text-center text-muted-foreground space-y-3 border border-border">
               <Bookmark className="w-8 h-8 text-primary/40 mx-auto" />
-              <p className="text-sm">You haven't bookmarked any jobs yet.</p>
+              <p className="text-sm font-medium">You haven't bookmarked any jobs yet.</p>
               <button
                 type="button"
                 onClick={() => setActiveTab('curated')}
-                className="text-xs text-primary font-bold hover:underline"
+                className="text-xs text-primary font-semibold hover:underline"
               >
                 Browse Curated Database →
               </button>
@@ -550,10 +550,10 @@ export default function JobMatcher() {
               {savedJobsList.map((job) => {
                 const match = calculateMatch(skills, job.required_skills, job.title);
                 return (
-                  <div key={job.id} className="glass-panel rounded-2xl p-6 border border-border space-y-4 relative">
+                  <div key={job.id} className="surface-card rounded-xl p-5 border border-border space-y-4 relative">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h3 className="text-base font-bold text-foreground">{job.title}</h3>
+                        <h3 className="text-sm font-semibold text-foreground">{job.title}</h3>
                         <p className="text-xs text-muted-foreground flex items-center gap-1 mt-0.5">
                           <Building className="h-3.5 w-3.5" /> {job.company} • {job.location}
                         </p>
@@ -599,24 +599,24 @@ export default function JobMatcher() {
       {activeTab === 'curated' && (
         <div className="space-y-4">
           <div className="flex items-center justify-between">
-            <h2 className="text-lg font-bold font-display text-foreground">
+            <h2 className="text-base font-bold tracking-tight text-foreground">
               Ranked Position Fits ({results.length})
             </h2>
-            <span className="text-xs text-muted-foreground">Sorted by compatibility index</span>
+            <span className="text-xs text-muted-foreground font-mono">Sorted by compatibility index</span>
           </div>
 
-          <div className="grid gap-5 md:grid-cols-2">
+          <div className="grid gap-4 md:grid-cols-2">
             {results.map((result) => {
               const isSaved = savedJobIds.includes(result.job.id);
               return (
                 <div
                   key={result.job.id}
-                  className="glass-panel rounded-3xl p-6 space-y-4 border border-border hover:border-primary/30 transition-all flex flex-col justify-between"
+                  className="surface-card rounded-xl p-5 space-y-4 border border-border/80 hover:border-primary/40 transition-colors flex flex-col justify-between"
                 >
                   <div className="space-y-3">
                     <div className="flex items-start justify-between gap-3">
                       <div>
-                        <h3 className="text-base sm:text-lg font-bold text-foreground">{result.job.title}</h3>
+                        <h3 className="text-sm sm:text-base font-semibold text-foreground">{result.job.title}</h3>
                         <div className="flex flex-wrap items-center gap-3 text-xs text-muted-foreground mt-1">
                           <span className="flex items-center gap-1"><Building className="h-3.5 w-3.5" />{result.job.company}</span>
                           <span className="flex items-center gap-1"><MapPin className="h-3.5 w-3.5" />{result.job.location || 'Remote'}</span>

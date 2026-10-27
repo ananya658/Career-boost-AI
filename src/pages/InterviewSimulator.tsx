@@ -125,7 +125,7 @@ export default function InterviewSimulator() {
     const questions = shuffleArray(availableQuestions).slice(0, questionCount);
 
     const newSession: InterviewSession = {
-      id: `interview-${Date.now()}`,
+      id: crypto.randomUUID(),
       role,
       difficulty,
       questions,
@@ -250,18 +250,18 @@ export default function InterviewSimulator() {
       {/* Top Header & Navigation */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold font-display text-foreground">AI Mock Interview Simulator</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Interview Simulator</h1>
           <p className="text-sm text-muted-foreground mt-1">
             Real-time interactive technical, architectural, and behavioral mock rounds with instant evaluations.
           </p>
         </div>
 
-        <div className="flex rounded-xl bg-muted/60 p-1 border border-border text-xs font-bold w-fit">
+        <div className="flex rounded-lg bg-muted/60 p-1 border border-border/60 text-xs font-semibold w-fit">
           <button
             type="button"
             onClick={() => setPhase('setup')}
-            className={`px-3.5 py-1.5 rounded-lg transition-all ${
-              phase !== 'history' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            className={`px-3 py-1.5 rounded-md transition-all ${
+              phase !== 'history' ? 'bg-card text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             Simulator
@@ -269,8 +269,8 @@ export default function InterviewSimulator() {
           <button
             type="button"
             onClick={() => setPhase('history')}
-            className={`px-3.5 py-1.5 rounded-lg transition-all flex items-center gap-1.5 ${
-              phase === 'history' ? 'bg-card text-foreground shadow-sm' : 'text-muted-foreground hover:text-foreground'
+            className={`px-3 py-1.5 rounded-md transition-all flex items-center gap-1.5 ${
+              phase === 'history' ? 'bg-card text-foreground shadow-sm font-semibold' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
             <History className="w-3.5 h-3.5" />
@@ -281,7 +281,7 @@ export default function InterviewSimulator() {
 
       {/* PHASE 1: SETUP FORM */}
       {phase === 'setup' && (
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-border space-y-8 shadow-xl">
+        <div className="surface-card rounded-2xl p-6 sm:p-8 border border-border space-y-8">
           {/* Transparency Disclaimer Banner */}
           <div className="p-4 rounded-2xl bg-primary/10 border border-primary/20 flex items-start gap-3 text-xs leading-relaxed">
             <Sparkles className="w-4 h-4 text-primary shrink-0 mt-0.5" />
@@ -397,13 +397,13 @@ export default function InterviewSimulator() {
       {phase === 'interviewing' && session && (
         <div className="space-y-6">
           {/* Status & Timer Card */}
-          <div className="glass-panel rounded-2xl p-4 sm:p-5 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="surface-card rounded-xl p-4 sm:p-5 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div className="flex items-center gap-3">
-              <span className="w-9 h-9 rounded-xl bg-primary/10 text-primary font-bold flex items-center justify-center text-sm">
+              <span className="w-8 h-8 rounded-lg bg-primary/10 text-primary font-bold flex items-center justify-center text-xs font-mono">
                 Q{session.currentQuestionIndex + 1}
               </span>
               <div>
-                <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider block">
+                <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider block">
                   Question {session.currentQuestionIndex + 1} of {session.questions.length}
                 </span>
                 <span className="text-sm font-semibold text-foreground">
@@ -414,7 +414,7 @@ export default function InterviewSimulator() {
 
             <div className="flex items-center gap-3">
               <div
-                className={`flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-mono font-bold ${
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-mono font-semibold ${
                   timeLeft < 30 ? 'bg-destructive/15 text-destructive animate-pulse' : 'bg-muted text-foreground'
                 }`}
               >
@@ -425,7 +425,7 @@ export default function InterviewSimulator() {
               <button
                 type="button"
                 onClick={() => setIsTimerRunning(!isTimerRunning)}
-                className="p-2 rounded-xl border border-border hover:bg-muted text-muted-foreground"
+                className="p-1.5 rounded-lg border border-border hover:bg-muted text-muted-foreground transition-colors"
                 title={isTimerRunning ? 'Pause timer' : 'Resume timer'}
               >
                 {isTimerRunning ? <Pause className="w-4 h-4" /> : <Play className="w-4 h-4" />}
@@ -434,15 +434,15 @@ export default function InterviewSimulator() {
           </div>
 
           {/* Active Question Prompt */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-border space-y-4">
+          <div className="surface-card rounded-2xl p-6 sm:p-7 border border-border space-y-4">
             <div className="flex items-center gap-2">
-              <span className="px-2.5 py-1 rounded-md bg-primary/10 text-primary text-xs font-bold">
-                {session.questions[session.currentQuestionIndex].difficulty.toUpperCase()}
+              <span className="px-2 py-0.5 rounded bg-primary/10 text-primary text-xs font-semibold uppercase tracking-wider font-mono">
+                {session.questions[session.currentQuestionIndex].difficulty}
               </span>
               <span className="text-xs text-muted-foreground">Target Response Time: {session.questions[session.currentQuestionIndex].timeLimit}s</span>
             </div>
 
-            <h2 className="text-xl sm:text-2xl font-bold font-display text-foreground leading-snug">
+            <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground leading-snug">
               "{session.questions[session.currentQuestionIndex].text}"
             </h2>
 
@@ -454,7 +454,7 @@ export default function InterviewSimulator() {
                 disabled={showFeedback}
                 rows={7}
                 placeholder="Type your response here. For best results, use the STAR format: specify the Situation, Task, your direct Action, and quantifiable Results..."
-                className="w-full rounded-2xl border border-border bg-background p-4 text-sm outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 resize-y"
+                className="w-full rounded-xl border border-border bg-background p-4 text-xs font-mono outline-none focus:ring-2 focus:ring-primary disabled:opacity-60 resize-y"
               />
               <div className="flex justify-between items-center text-xs text-muted-foreground mt-2 px-1">
                 <span>Words: {currentAnswer.trim().split(/\s+/).filter(Boolean).length}</span>
@@ -468,7 +468,7 @@ export default function InterviewSimulator() {
                   type="button"
                   disabled={!currentAnswer.trim() || evaluating}
                   onClick={submitAnswer}
-                  className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/25 hover:bg-primary/90 disabled:opacity-50 transition-all"
+                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/95 disabled:opacity-50 transition-colors"
                 >
                   <Send className="w-4 h-4" />
                   Submit Answer for AI Evaluation
@@ -483,7 +483,7 @@ export default function InterviewSimulator() {
               <motion.div
                 initial={{ opacity: 0, y: 15 }}
                 animate={{ opacity: 1, y: 0 }}
-                className="glass-panel rounded-3xl p-6 sm:p-8 border border-primary/25 space-y-6 shadow-xl"
+                className="surface-card rounded-2xl p-6 sm:p-7 border border-primary/25 space-y-6"
               >
                 <div className="flex items-center justify-between border-b border-border/50 pb-4">
                   <div className="flex items-center gap-2.5">
@@ -575,47 +575,47 @@ export default function InterviewSimulator() {
 
       {/* PHASE 3: COMPLETED REPORT */}
       {phase === 'completed' && session && (
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-border space-y-8 shadow-2xl">
+        <div className="surface-card rounded-2xl p-6 sm:p-8 border border-border space-y-8">
           <div className="text-center space-y-3 max-w-xl mx-auto">
-            <div className="w-16 h-16 rounded-3xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center mx-auto shadow-inner">
-              <Award className="w-8 h-8" />
+            <div className="w-14 h-14 rounded-2xl bg-emerald-500/15 text-emerald-500 flex items-center justify-center mx-auto">
+              <Award className="w-7 h-7" />
             </div>
-            <h2 className="text-3xl font-extrabold font-display">Interview Session Complete!</h2>
-            <p className="text-sm text-muted-foreground">
-              You scored an average of <span className="text-foreground font-bold">{session.totalScore}%</span> across {session.questions.length} questions for <span className="text-primary font-bold">{session.role}</span>.
+            <h2 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Interview Session Complete</h2>
+            <p className="text-xs sm:text-sm text-muted-foreground">
+              You scored an average of <span className="text-foreground font-semibold font-mono">{session.totalScore}%</span> across {session.questions.length} questions for <span className="text-primary font-semibold">{session.role}</span>.
             </p>
           </div>
 
           <div className="grid sm:grid-cols-3 gap-4">
-            <div className="p-5 rounded-2xl bg-card border border-border text-center space-y-1">
-              <span className="text-xs text-muted-foreground uppercase font-semibold">Overall Readiness</span>
-              <div className="text-3xl font-extrabold font-display text-emerald-500">{session.totalScore}%</div>
+            <div className="p-4 rounded-xl surface-card border border-border text-center space-y-1">
+              <span className="text-[11px] text-muted-foreground uppercase font-medium">Readiness Index</span>
+              <div className="text-2xl font-bold font-mono text-emerald-500">{session.totalScore}%</div>
               <p className="text-[11px] text-muted-foreground">{session.totalScore >= 75 ? 'Ready for Screen' : 'Needs Reinforcement'}</p>
             </div>
-            <div className="p-5 rounded-2xl bg-card border border-border text-center space-y-1">
-              <span className="text-xs text-muted-foreground uppercase font-semibold">Difficulty Level</span>
-              <div className="text-3xl font-extrabold font-display capitalize text-foreground">{session.difficulty}</div>
+            <div className="p-4 rounded-xl surface-card border border-border text-center space-y-1">
+              <span className="text-[11px] text-muted-foreground uppercase font-medium">Difficulty Level</span>
+              <div className="text-2xl font-bold capitalize text-foreground">{session.difficulty}</div>
               <p className="text-[11px] text-muted-foreground">{session.questions.length} Questions Answered</p>
             </div>
-            <div className="p-5 rounded-2xl bg-card border border-border text-center space-y-1">
-              <span className="text-xs text-muted-foreground uppercase font-semibold">XP Earned</span>
-              <div className="text-3xl font-extrabold font-display text-amber-500">+80 XP</div>
-              <p className="text-[11px] text-muted-foreground">Added to Your Profile</p>
+            <div className="p-4 rounded-xl surface-card border border-border text-center space-y-1">
+              <span className="text-[11px] text-muted-foreground uppercase font-medium">XP Earned</span>
+              <div className="text-2xl font-bold font-mono text-amber-500">+80 XP</div>
+              <p className="text-[11px] text-muted-foreground">Added to Profile</p>
             </div>
           </div>
 
           {/* Breakdown per question */}
           <div className="space-y-4">
-            <h3 className="text-base font-bold font-display text-foreground">Question-by-Question Evaluation Breakdown</h3>
+            <h3 className="text-sm font-semibold tracking-tight text-foreground">Question-by-Question Evaluation Breakdown</h3>
             <div className="space-y-3">
               {session.questions.map((q, idx) => (
-                <div key={q.id} className="p-4 rounded-2xl bg-muted/30 border border-border/70 space-y-2">
+                <div key={q.id} className="p-4 rounded-xl surface-card border border-border/70 space-y-2">
                   <div className="flex items-center justify-between text-xs">
-                    <span className="font-bold text-primary">Q{idx + 1}: {q.category}</span>
-                    <span className="font-extrabold text-foreground">{session.scores[idx]}% Score</span>
+                    <span className="font-semibold text-primary">Q{idx + 1}: {q.category}</span>
+                    <span className="font-mono font-bold text-foreground">{session.scores[idx]}% Score</span>
                   </div>
                   <p className="text-xs text-foreground font-medium">{q.text}</p>
-                  <p className="text-xs text-muted-foreground bg-card/60 p-2.5 rounded-lg border border-border/50">
+                  <p className="text-xs text-muted-foreground bg-muted/40 p-2.5 rounded-lg border border-border/50">
                     {session.feedbacks[idx] || 'Answer recorded.'}
                   </p>
                 </div>
@@ -627,14 +627,14 @@ export default function InterviewSimulator() {
             <button
               type="button"
               onClick={restartInterview}
-              className="flex-1 py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/25 hover:bg-primary/90 flex items-center justify-center gap-2 transition-all"
+              className="flex-1 py-2.5 rounded-lg bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/95 flex items-center justify-center gap-2 transition-colors"
             >
               <RotateCcw className="w-4 h-4" /> Start Another Interview
             </button>
             <button
               type="button"
               onClick={() => setPhase('history')}
-              className="px-6 py-3.5 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground font-semibold text-sm transition-colors"
+              className="px-5 py-2.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground font-semibold text-xs transition-colors"
             >
               View All History
             </button>
@@ -644,13 +644,13 @@ export default function InterviewSimulator() {
 
       {/* PHASE 4: PAST HISTORY VIEW */}
       {phase === 'history' && (
-        <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-border space-y-6">
+        <div className="surface-card rounded-2xl p-6 sm:p-8 border border-border space-y-6">
           <div className="flex items-center justify-between">
-            <h2 className="text-xl font-bold font-display">Completed Interview Sessions ({pastInterviews.length})</h2>
+            <h2 className="text-base font-bold tracking-tight text-foreground">Completed Interview Sessions ({pastInterviews.length})</h2>
             <button
               type="button"
               onClick={() => setPhase('setup')}
-              className="text-xs text-primary font-bold hover:underline"
+              className="text-xs text-primary font-semibold hover:underline"
             >
               + Start New Simulation
             </button>

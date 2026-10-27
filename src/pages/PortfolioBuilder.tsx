@@ -347,37 +347,37 @@ export default function PortfolioBuilder() {
       {/* Top Header & Publishing Controls */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-extrabold font-display text-foreground">Developer Portfolio Builder</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Portfolio Builder</h1>
           <p className="text-sm text-muted-foreground mt-1">
-            Build, theme, and publish a live responsive developer showcase with instant shareable links.
+            Build, theme, and publish a responsive developer showcase with instant shareable links.
           </p>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             type="button"
             onClick={handleCopyShareLink}
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-card border border-border hover:bg-muted text-xs font-semibold text-foreground transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-xs font-medium text-foreground transition-colors"
           >
             {copiedLink ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
-            {copiedLink ? 'Link Copied!' : 'Copy Share URL'}
+            {copiedLink ? 'Link Copied' : 'Share URL'}
           </button>
 
           <Link
             to={publicUrl}
             target="_blank"
             rel="noreferrer"
-            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-secondary hover:bg-secondary/80 text-foreground text-xs font-semibold transition-colors"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border bg-card hover:bg-muted text-foreground text-xs font-medium transition-colors"
           >
             <ExternalLink className="w-3.5 h-3.5" />
-            Live Preview Tab
+            Live Preview
           </Link>
 
           <button
             type="button"
             disabled={saving}
             onClick={() => handleSave()}
-            className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-primary text-white text-xs font-bold shadow-lg shadow-primary/25 hover:bg-primary/90 disabled:opacity-50 transition-all"
+            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/95 disabled:opacity-50 transition-colors"
           >
             {saving ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
             Save & Publish
@@ -397,8 +397,8 @@ export default function PortfolioBuilder() {
         {/* Left Column: Form Editor */}
         <div className="lg:col-span-6 space-y-6">
           {/* Identity & Slug Settings */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-border space-y-4">
-            <h2 className="text-base font-bold font-display text-foreground flex items-center gap-2">
+          <div className="surface-card rounded-2xl p-5 sm:p-6 border border-border space-y-4">
+            <h2 className="text-sm sm:text-base font-semibold tracking-tight text-foreground flex items-center gap-2">
               <Globe className="w-4 h-4 text-primary" />
               Public URL & Theme
             </h2>
@@ -491,9 +491,9 @@ export default function PortfolioBuilder() {
           </div>
 
           {/* Featured Projects */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-border space-y-4">
+          <div className="surface-card rounded-2xl p-5 sm:p-6 border border-border space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold font-display text-foreground">Featured Projects ({projects.length})</h2>
+              <h2 className="text-sm sm:text-base font-semibold tracking-tight text-foreground">Featured Projects ({projects.length})</h2>
               <button
                 type="button"
                 onClick={addProject}
@@ -571,9 +571,9 @@ export default function PortfolioBuilder() {
           </div>
 
           {/* Work Experience */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-border space-y-4">
+          <div className="surface-card rounded-2xl p-5 sm:p-6 border border-border space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold font-display text-foreground">Work Experience ({experience.length})</h2>
+              <h2 className="text-sm sm:text-base font-semibold tracking-tight text-foreground">Work Experience ({experience.length})</h2>
               <button
                 type="button"
                 onClick={addExperience}
@@ -651,9 +651,9 @@ export default function PortfolioBuilder() {
           </div>
 
           {/* Education Credentials */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-border space-y-4">
+          <div className="surface-card rounded-2xl p-5 sm:p-6 border border-border space-y-4">
             <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold font-display text-foreground flex items-center gap-2">
+              <h2 className="text-sm sm:text-base font-semibold tracking-tight text-foreground flex items-center gap-2">
                 <GraduationCap className="w-4 h-4 text-primary" />
                 Education ({education.length})
               </h2>
@@ -720,8 +720,8 @@ export default function PortfolioBuilder() {
               ))}
             </div>
           </div>
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-border space-y-4">
-            <h2 className="text-base font-bold font-display text-foreground">Contact & Social Links</h2>
+          <div className="surface-card rounded-2xl p-5 sm:p-6 border border-border space-y-4">
+            <h2 className="text-sm sm:text-base font-semibold tracking-tight text-foreground">Contact & Social Links</h2>
             <div className="grid sm:grid-cols-2 gap-3 text-xs">
               <div>
                 <label className="block text-muted-foreground mb-1">Email</label>
@@ -801,11 +801,11 @@ export default function PortfolioBuilder() {
 
           {/* Mock Preview Window */}
           <div
-            className={`mx-auto transition-all duration-300 rounded-3xl border border-border shadow-2xl overflow-hidden ${
+            className={`mx-auto transition-all duration-300 rounded-2xl border border-border overflow-hidden surface-card ${
               previewDevice === 'mobile' ? 'max-w-[375px]' : 'w-full'
             } ${
               theme === 'creative'
-                ? 'bg-gradient-to-br from-slate-950 via-purple-950/40 to-slate-950 text-slate-100'
+                ? 'bg-slate-950 text-slate-100'
                 : theme === 'cyber'
                 ? 'bg-slate-950 text-cyan-400 font-mono border-cyan-500/30'
                 : theme === 'executive'

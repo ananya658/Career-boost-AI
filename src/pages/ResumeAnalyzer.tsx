@@ -183,7 +183,7 @@ export default function ResumeAnalyzer() {
       const missingSkills = jdSkills.length ? recommendMissingSkills(parsed.skills, jdSkills) : [];
 
       const record: Omit<ResumeRecord, 'user_id'> = {
-        id: `resume-${Date.now()}`,
+        id: crypto.randomUUID(),
         title,
         content,
         target_role: targetRole,
@@ -248,7 +248,7 @@ export default function ResumeAnalyzer() {
     <div className="space-y-8 pb-12 max-w-6xl mx-auto">
       {/* Header */}
       <div>
-        <h1 className="text-3xl font-extrabold font-display text-foreground">AI Resume ATS Analyzer</h1>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight text-foreground">Resume Analyzer</h1>
         <p className="text-sm text-muted-foreground mt-1">
           Scan your resume against modern ATS filters, identify missing skills, and generate quantifiable bullet points.
         </p>
@@ -257,7 +257,7 @@ export default function ResumeAnalyzer() {
       <div className="grid lg:grid-cols-12 gap-8 items-start">
         {/* Left Column: Input Form */}
         <div className="lg:col-span-5 space-y-6">
-          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-border space-y-5">
+          <div className="surface-card rounded-2xl p-6 border border-border space-y-5">
             {/* Target Role Selector */}
             <div>
               <label className="block text-xs font-bold text-muted-foreground uppercase tracking-wider mb-2">
@@ -366,10 +366,10 @@ export default function ResumeAnalyzer() {
 
           {/* Past Analyses History */}
           {analyses.length > 0 && (
-            <div className="glass-panel rounded-3xl p-6 border border-border space-y-4">
+            <div className="surface-card rounded-2xl p-5 border border-border space-y-4">
               <div className="flex items-center justify-between">
-                <h3 className="text-sm font-bold font-display text-foreground">Past Analyses ({analyses.length})</h3>
-                <span className="text-xs text-muted-foreground">Saved to account</span>
+                <h3 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Past Analyses ({analyses.length})</h3>
+                <span className="text-[11px] text-muted-foreground font-mono">Saved</span>
               </div>
 
               <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
@@ -385,24 +385,24 @@ export default function ResumeAnalyzer() {
                         title: a.title,
                       });
                     }}
-                    className="p-3 rounded-xl bg-muted/40 hover:bg-muted cursor-pointer transition-colors flex items-center justify-between gap-3 text-xs"
+                    className="p-3 rounded-lg bg-muted/40 hover:bg-muted cursor-pointer transition-colors flex items-center justify-between gap-3 text-xs"
                   >
                     <div className="min-w-0">
-                      <span className="font-bold text-foreground truncate block">{a.title}</span>
-                      <span className="text-[11px] text-muted-foreground flex items-center gap-1">
+                      <span className="font-semibold text-foreground truncate block">{a.title}</span>
+                      <span className="text-[11px] text-muted-foreground flex items-center gap-1 font-mono">
                         <Clock className="w-3 h-3" /> {new Date(a.created_at || '').toLocaleDateString()}
                       </span>
                     </div>
 
                     <div className="flex items-center gap-2">
-                      <span className="font-extrabold text-emerald-500 font-mono">{a.ats_score}%</span>
+                      <span className="font-bold text-emerald-500 font-mono">{a.ats_score}%</span>
                       <button
                         type="button"
                         onClick={(e) => {
                           e.stopPropagation();
                           void handleDelete(a.id);
                         }}
-                        className="p-1 hover:text-destructive text-muted-foreground"
+                        className="p-1 hover:text-destructive text-muted-foreground transition-colors"
                       >
                         <Trash2 className="w-3.5 h-3.5" />
                       </button>
@@ -417,19 +417,19 @@ export default function ResumeAnalyzer() {
         {/* Right Column: Active Results View */}
         <div className="lg:col-span-7 space-y-6">
           {activeAnalysis ? (
-            <div className="glass-panel rounded-3xl p-6 sm:p-8 border border-border space-y-8 shadow-2xl">
+            <div className="surface-card rounded-2xl p-6 sm:p-7 border border-border space-y-8">
               {/* ATS Score Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-border/50 pb-6">
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-primary">ATS Evaluation</span>
-                  <h2 className="text-2xl font-bold font-display text-foreground">{activeAnalysis.title}</h2>
+                  <span className="text-xs font-semibold uppercase tracking-wider text-primary">ATS Evaluation</span>
+                  <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground">{activeAnalysis.title}</h2>
                   <p className="text-xs text-muted-foreground mt-0.5">Calibrated for {targetRole}</p>
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <div className="text-right">
+                  <div className="text-left sm:text-right">
                     <div
-                      className={`text-4xl font-extrabold font-display ${
+                      className={`text-3xl sm:text-4xl font-extrabold font-mono ${
                         activeAnalysis.score >= 80
                           ? 'text-emerald-500'
                           : activeAnalysis.score >= 60
@@ -439,7 +439,7 @@ export default function ResumeAnalyzer() {
                     >
                       {activeAnalysis.score}%
                     </div>
-                    <span className="text-[11px] text-muted-foreground font-semibold">ATS Compatibility</span>
+                    <span className="text-[11px] text-muted-foreground font-medium">ATS Compatibility</span>
                   </div>
                 </div>
               </div>
@@ -549,13 +549,13 @@ export default function ResumeAnalyzer() {
               )}
             </div>
           ) : (
-            <div className="glass-panel rounded-3xl p-12 text-center text-muted-foreground space-y-4">
-              <div className="w-16 h-16 rounded-3xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
-                <FileText className="w-8 h-8" />
+            <div className="surface-card rounded-2xl p-12 text-center text-muted-foreground space-y-4 border border-border">
+              <div className="w-14 h-14 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto">
+                <FileText className="w-7 h-7" />
               </div>
               <div className="space-y-1 max-w-sm mx-auto">
-                <h3 className="text-base font-bold text-foreground">No Resume Analyzed Yet</h3>
-                <p className="text-xs">
+                <h3 className="text-sm font-semibold text-foreground">No Resume Analyzed Yet</h3>
+                <p className="text-xs leading-relaxed text-muted-foreground">
                   Paste your resume text or upload a PDF/DOCX file on the left to view your ATS compatibility score and bullet suggestions.
                 </p>
               </div>

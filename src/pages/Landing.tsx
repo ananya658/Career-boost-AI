@@ -5,572 +5,514 @@ import {
   Briefcase,
   FileText,
   Mic,
-  Map,
+  Compass,
   Globe,
-  Sparkles,
   ArrowRight,
   CheckCircle2,
   ChevronRight,
-  Zap,
-  Play
+  Play,
+  Crosshair,
+  Code2,
+  ShieldCheck,
+  Menu,
+  X
 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import CareerJourneyMap from '../components/CareerJourneyMap';
+import ProductPreview from '../components/ProductPreview';
 
 export default function Landing() {
   const { user, signInWithDemo } = useAuth();
   const navigate = useNavigate();
-  const [activeFeatureTab, setActiveFeatureTab] = useState<'resume' | 'interview' | 'jobs' | 'roadmap' | 'portfolio'>('resume');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const handleDemoLaunch = () => {
     signInWithDemo('alex.developer@careerboost.ai', 'Alex Developer');
     navigate('/dashboard');
   };
 
-  const featureTabs = [
-    { id: 'resume', label: 'Resume ATS', icon: FileText },
-    { id: 'interview', label: 'AI Interview', icon: Mic },
-    { id: 'jobs', label: 'Job Matcher', icon: Briefcase },
-    { id: 'roadmap', label: 'Roadmap', icon: Map },
-    { id: 'portfolio', label: 'Portfolio', icon: Globe },
-  ] as const;
+  const scrollToSection = (id: string) => {
+    setMobileNavOpen(false);
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col selection:bg-primary/20 selection:text-primary">
-      {/* Navigation Header */}
-      <header className="sticky top-0 z-50 border-b border-border/50 bg-background/80 backdrop-blur-xl">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-18 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-3 font-bold text-2xl tracking-tight">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary to-purple-600 flex items-center justify-center text-white shadow-lg shadow-primary/20">
-              <Briefcase className="w-5 h-5" />
+      {/* 1. Navigation Header */}
+      <header className="sticky top-0 z-50 border-b border-border bg-background/80 backdrop-blur-xl">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
+          <Link to="/" className="flex items-center gap-2.5 font-bold text-xl tracking-tight">
+            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-primary-foreground">
+              <Briefcase className="w-4 h-4" />
             </div>
-            <span className="font-display font-extrabold text-foreground">
-              CareerBoost<span className="text-primary">.ai</span>
+            <span className="font-display font-bold text-foreground">
+              CareerBoost<span className="text-primary font-mono text-xs ml-1 px-1.5 py-0.5 rounded bg-primary/10">AI</span>
             </span>
           </Link>
 
-          <nav className="hidden md:flex items-center gap-8 text-sm font-medium text-muted-foreground">
-            <a href="#features" className="hover:text-foreground transition-colors">Features</a>
-            <a href="#workflow" className="hover:text-foreground transition-colors">How It Works</a>
-            <a href="#preview" className="hover:text-foreground transition-colors">Live Preview</a>
-            <a href="#outcomes" className="hover:text-foreground transition-colors">Outcomes</a>
+          {/* Desktop Nav Links */}
+          <nav className="hidden md:flex items-center gap-7 text-xs font-semibold uppercase tracking-wider text-muted-foreground font-mono">
+            <button
+              type="button"
+              onClick={() => scrollToSection('capabilities')}
+              className="hover:text-foreground transition-colors cursor-pointer"
+            >
+              Capabilities
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection('journey')}
+              className="hover:text-foreground transition-colors cursor-pointer"
+            >
+              Interactive Map
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection('preview')}
+              className="hover:text-foreground transition-colors cursor-pointer"
+            >
+              Live Preview
+            </button>
+            <button
+              type="button"
+              onClick={() => scrollToSection('methodology')}
+              className="hover:text-foreground transition-colors cursor-pointer"
+            >
+              Methodology
+            </button>
           </nav>
 
-          <div className="flex items-center gap-3">
+          {/* Action CTAs */}
+          <div className="hidden sm:flex items-center gap-3">
             {user ? (
               <Link
                 to="/dashboard"
-                className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all text-sm"
+                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-primary text-primary-foreground font-semibold text-xs shadow-xs hover:bg-primary/90 transition-all"
               >
                 Go to Dashboard
-                <ArrowRight className="w-4 h-4" />
+                <ArrowRight className="w-3.5 h-3.5" />
               </Link>
             ) : (
               <>
                 <button
+                  type="button"
                   onClick={handleDemoLaunch}
-                  className="hidden sm:inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-semibold border border-border/80 hover:bg-muted text-foreground transition-colors"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
                 >
-                  <Play className="w-3.5 h-3.5 text-primary fill-primary" />
-                  Try Instant Demo
+                  <Play className="w-3 h-3 text-primary fill-primary" />
+                  Instant Sandbox
                 </button>
                 <Link
                   to="/auth"
-                  className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-primary text-primary-foreground font-semibold shadow-lg shadow-primary/25 hover:bg-primary/90 transition-all text-sm"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg border border-border text-xs font-semibold text-foreground hover:bg-muted transition-colors"
                 >
                   Sign In
-                  <ChevronRight className="w-4 h-4" />
+                </Link>
+                <Link
+                  to="/auth?mode=signup"
+                  className="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold hover:bg-primary/90 transition-all shadow-xs"
+                >
+                  Get Started
                 </Link>
               </>
             )}
           </div>
+
+          {/* Mobile Menu Trigger */}
+          <button
+            type="button"
+            onClick={() => setMobileNavOpen(!mobileNavOpen)}
+            className="md:hidden p-2 rounded-lg text-foreground hover:bg-muted"
+            aria-label="Toggle Navigation Menu"
+          >
+            {mobileNavOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
         </div>
+
+        {/* Mobile Navigation Dropdown */}
+        {mobileNavOpen && (
+          <div className="md:hidden border-b border-border bg-background p-4 space-y-3">
+            <nav className="flex flex-col space-y-2 text-sm font-medium">
+              <button
+                type="button"
+                onClick={() => scrollToSection('capabilities')}
+                className="text-left py-1.5 text-muted-foreground hover:text-foreground"
+              >
+                Capabilities
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToSection('journey')}
+                className="text-left py-1.5 text-muted-foreground hover:text-foreground"
+              >
+                Interactive Map
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToSection('preview')}
+                className="text-left py-1.5 text-muted-foreground hover:text-foreground"
+              >
+                Live Preview
+              </button>
+              <button
+                type="button"
+                onClick={() => scrollToSection('methodology')}
+                className="text-left py-1.5 text-muted-foreground hover:text-foreground"
+              >
+                Methodology
+              </button>
+            </nav>
+            <div className="pt-3 border-t border-border flex flex-col gap-2">
+              <button
+                type="button"
+                onClick={handleDemoLaunch}
+                className="w-full py-2.5 rounded-lg border border-border text-xs font-semibold text-foreground flex items-center justify-center gap-2"
+              >
+                <Play className="w-3.5 h-3.5 text-primary fill-primary" />
+                Launch Instant Demo
+              </button>
+              <Link
+                to="/auth?mode=signup"
+                className="w-full py-2.5 rounded-lg bg-primary text-primary-foreground text-xs font-semibold text-center"
+              >
+                Create Account
+              </Link>
+            </div>
+          </div>
+        )}
       </header>
 
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-24 overflow-hidden">
-        {/* Ambient glow backgrounds */}
-        <div className="absolute top-1/4 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[700px] h-[500px] bg-gradient-to-tr from-primary/15 via-purple-500/10 to-pink-500/5 blur-[120px] rounded-full pointer-events-none -z-10" />
+      {/* 2. Editorial Hero Section */}
+      <section className="relative pt-16 sm:pt-24 pb-16 border-b border-border bg-grid-pattern">
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+          {/* Status Badge */}
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="inline-flex items-center gap-2 px-3 py-1 rounded-full border border-border bg-card text-xs font-mono text-muted-foreground shadow-xs"
+          >
+            <span className="w-2 h-2 rounded-full bg-emerald-500" />
+            <span>Structured Career Acceleration Platform</span>
+            <span className="text-border">|</span>
+            <span className="text-primary font-semibold">Engineering Track</span>
+          </motion.div>
 
-        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8">
+          {/* Headline */}
+          <motion.h1
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.05 }}
+            className="text-4xl sm:text-6xl font-extrabold tracking-tight font-display text-foreground max-w-4xl"
+          >
+            The deliberate path from software engineer to hired.
+          </motion.h1>
+
+          {/* Subtitle */}
+          <motion.p
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.1 }}
+            className="text-base sm:text-xl text-muted-foreground max-w-2xl leading-relaxed"
+          >
+            Benchmark your resume against applicant tracking systems, simulate realistic technical and behavioral rounds under pressure, and navigate your milestone curriculum with measurable clarity.
+          </motion.p>
+
+          {/* Hero CTAs */}
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-primary/20 bg-primary/10 text-primary text-xs sm:text-sm font-semibold backdrop-blur-md"
+            transition={{ delay: 0.15 }}
+            className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2"
           >
-            <Sparkles className="w-4 h-4 text-primary animate-pulse" />
-            Next-Gen AI Career Copilot for Software Engineers & Tech Pros
+            <Link
+              to={user ? '/dashboard' : '/auth?mode=signup'}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-sm shadow-xs hover:bg-primary/90 transition-all text-center"
+            >
+              Build Your Career Plan
+              <ArrowRight className="w-4 h-4" />
+            </Link>
+
+            <button
+              type="button"
+              onClick={() => scrollToSection('journey')}
+              className="inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-border bg-card text-foreground font-semibold text-sm hover:bg-muted transition-colors text-center cursor-pointer"
+            >
+              Explore Interactive Pipeline
+            </button>
           </motion.div>
 
-          <motion.h1
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight font-display leading-[1.1]"
-          >
-            Land Your Dream Role with <br />
-            <span className="gradient-text">Precision AI Preparation</span>
-          </motion.h1>
-
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            className="text-lg sm:text-xl text-muted-foreground max-w-3xl mx-auto leading-relaxed"
-          >
-            Stop submitting blind applications. Analyze your resume against ATS algorithms,
-            practice real-time technical and behavioral interviews with actionable AI feedback,
-            and generate a live, shareable developer portfolio in minutes.
-          </motion.p>
-
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-4"
-          >
-            {user ? (
-              <Link
-                to="/dashboard"
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-gradient-to-r from-primary to-purple-600 text-white font-bold text-base shadow-xl shadow-primary/25 hover:from-primary/95 hover:to-purple-600/95 transition-all"
-              >
-                Open My Dashboard
-                <ArrowRight className="w-5 h-5" />
-              </Link>
-            ) : (
-              <>
-                <Link
-                  to="/auth?mode=signup"
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-3 px-8 py-4 rounded-xl bg-primary text-white font-bold text-base shadow-xl shadow-primary/25 hover:bg-primary/90 transition-all"
-                >
-                  Start Free Today
-                  <ArrowRight className="w-5 h-5" />
-                </Link>
-                <button
-                  onClick={handleDemoLaunch}
-                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-card border border-border/80 font-bold text-base hover:bg-muted text-foreground transition-all shadow-sm"
-                >
-                  <Play className="w-4 h-4 text-primary fill-primary" />
-                  Instant Sandbox Demo
-                </button>
-              </>
-            )}
-          </motion.div>
-
+          {/* Trust Guarantees */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.4 }}
-            className="pt-6 flex flex-wrap items-center justify-center gap-6 sm:gap-10 text-xs sm:text-sm text-muted-foreground"
+            transition={{ delay: 0.2 }}
+            className="pt-4 flex flex-wrap items-center gap-6 text-xs font-mono text-muted-foreground"
           >
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              No Credit Card Required
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Real ATS parsing logic
             </span>
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              Real Job Match Algorithm
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> STAR-format answer feedback
             </span>
-            <span className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-500" />
-              Row Level Security Protected
+            <span className="flex items-center gap-1.5">
+              <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" /> Private, user-isolated data
             </span>
           </motion.div>
         </div>
       </section>
 
-      {/* Interactive Feature Deep Dive */}
-      <section id="preview" className="py-20 border-t border-border/40 bg-muted/20 relative">
+      {/* 3. Signature Motion Graphic: Career Progression Pipeline */}
+      <section id="journey" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div className="max-w-2xl space-y-2">
+          <span className="accent-badge text-primary font-bold">Interactive Progression Map</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground">
+            A cohesive system, not disconnected tools.
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Explore how each capability feeds directly into the next stage of your preparation.
+          </p>
+        </div>
+
+        <CareerJourneyMap />
+      </section>
+
+      {/* 4. Product Preview Section */}
+      <section id="preview" className="py-16 border-t border-border bg-muted/10">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+          <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+            <div className="space-y-2 max-w-xl">
+              <span className="accent-badge text-primary font-bold">Workspace Inspection</span>
+              <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground">
+                Genuine application preview.
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                Test the actual interfaces used for keyword parsing, timed question responses, and role alignment.
+              </p>
+            </div>
+            <span className="text-xs font-mono text-muted-foreground">
+              Simulated interactive state
+            </span>
+          </div>
+
+          <ProductPreview />
+        </div>
+      </section>
+
+      {/* 5. Core Capabilities (Bento Architecture) */}
+      <section id="capabilities" className="py-20 border-t border-border max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
+        <div className="max-w-2xl space-y-2">
+          <span className="accent-badge text-primary font-bold">Core Capabilities</span>
+          <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground">
+            Five focused instruments for engineering advancement.
+          </h2>
+          <p className="text-sm text-muted-foreground">
+            Every feature addresses a specific bottleneck in the tech hiring funnel.
+          </p>
+        </div>
+
+        <div className="grid md:grid-cols-3 gap-5">
+          {/* 1. Resume Analyzer */}
+          <div className="surface-card rounded-2xl p-6 sm:p-7 border border-border flex flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <FileText className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold font-display text-foreground">
+                Resume ATS Analyzer
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Evaluates keyword density, bullet point metrics, and section structure against automated screening filters.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-border/50 flex items-center justify-between">
+              <span className="text-xs font-mono text-muted-foreground">PDF & DOCX Support</span>
+              <Link to="/resume" className="text-xs font-semibold text-primary inline-flex items-center gap-1 hover:underline">
+                Inspect <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* 2. Interview Simulator */}
+          <div className="surface-card rounded-2xl p-6 sm:p-7 border border-border flex flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <Mic className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold font-display text-foreground">
+                STAR Interview Simulator
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Timed questions for frontend, backend, devops, and data roles with instant breakdown across clarity and technical accuracy.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-border/50 flex items-center justify-between">
+              <span className="text-xs font-mono text-muted-foreground">STAR Framework Rubric</span>
+              <Link to="/interview" className="text-xs font-semibold text-primary inline-flex items-center gap-1 hover:underline">
+                Practice <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* 3. Job Matcher */}
+          <div className="surface-card rounded-2xl p-6 sm:p-7 border border-border flex flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <Crosshair className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold font-display text-foreground">
+                Precision Job Matcher
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Computes match percentages against market positions, revealing exact skill intersections and missing qualifications.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-border/50 flex items-center justify-between">
+              <span className="text-xs font-mono text-muted-foreground">22 Curated Positions</span>
+              <Link to="/jobs" className="text-xs font-semibold text-primary inline-flex items-center gap-1 hover:underline">
+                Match <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* 4. Career Roadmap */}
+          <div className="surface-card rounded-2xl p-6 sm:p-7 border border-border flex flex-col justify-between space-y-6 md:col-span-2">
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <Compass className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold font-display text-foreground">
+                Personalized Engineering Roadmap
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed max-w-xl">
+                Structured phased progression from fundamentals to distributed production architectures, with verified documentation links and practical portfolio milestone recommendations.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-border/50 flex items-center justify-between">
+              <span className="text-xs font-mono text-muted-foreground">Interactive Checkbox Tracking</span>
+              <Link to="/roadmap" className="text-xs font-semibold text-primary inline-flex items-center gap-1 hover:underline">
+                Explore Curriculum <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+
+          {/* 5. Portfolio Builder */}
+          <div className="surface-card rounded-2xl p-6 sm:p-7 border border-border flex flex-col justify-between space-y-6">
+            <div className="space-y-3">
+              <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center font-bold">
+                <Globe className="w-5 h-5" />
+              </div>
+              <h3 className="text-lg font-bold font-display text-foreground">
+                Hosted Developer Portfolio
+              </h3>
+              <p className="text-xs sm:text-sm text-muted-foreground leading-relaxed">
+                Deploy clean, responsive developer showcase sites with print-to-PDF formatting hosted on custom slugs.
+              </p>
+            </div>
+            <div className="pt-4 border-t border-border/50 flex items-center justify-between">
+              <span className="text-xs font-mono text-muted-foreground">Shareable `/p/:slug`</span>
+              <Link to="/portfolio" className="text-xs font-semibold text-primary inline-flex items-center gap-1 hover:underline">
+                Publish <ChevronRight className="w-3.5 h-3.5" />
+              </Link>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* 6. Methodology: How It Works */}
+      <section id="methodology" className="py-20 border-t border-border bg-muted/10">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-12">
-          <div className="text-center space-y-4 max-w-3xl mx-auto">
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-display">
-              A Full Career Acceleration Suite
+          <div className="max-w-2xl space-y-2">
+            <span className="accent-badge text-primary font-bold">Methodology</span>
+            <h2 className="text-2xl sm:text-3xl font-extrabold font-display text-foreground">
+              Three disciplined steps to hiring readiness.
             </h2>
-            <p className="text-muted-foreground text-base sm:text-lg">
-              Explore the five integrated tools designed to take you from resume polishing to final round offer.
-            </p>
           </div>
 
-          {/* Feature switcher tabs */}
-          <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-3">
-            {featureTabs.map((tab) => {
-              const Icon = tab.icon;
-              const isActive = activeFeatureTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveFeatureTab(tab.id)}
-                  className={`inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all ${
-                    isActive
-                      ? 'bg-primary text-white shadow-lg shadow-primary/20'
-                      : 'bg-card border border-border/80 text-muted-foreground hover:text-foreground hover:bg-muted'
-                  }`}
-                >
-                  <Icon className="w-4 h-4" />
-                  {tab.label}
-                </button>
-              );
-            })}
-          </div>
+          <div className="grid md:grid-cols-3 gap-6">
+            <div className="surface-card p-6 sm:p-8 rounded-xl border border-border space-y-3">
+              <span className="font-mono text-xs font-bold text-primary">01 / AUDIT</span>
+              <h3 className="font-display font-bold text-base text-foreground">
+                Establish Your Quantitative Baseline
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Scan your resume and background against automated ATS filters. Pinpoint missing high-frequency tech terms, weak action verbs, and unquantified achievements.
+              </p>
+            </div>
 
-          {/* Interactive Preview Card */}
-          <div className="glass-panel rounded-3xl p-6 sm:p-10 border border-border shadow-2xl relative overflow-hidden">
-            {activeFeatureTab === 'resume' && (
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div className="space-y-6">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-500 text-xs font-bold">
-                    <FileText className="w-3.5 h-3.5" />
-                    Resume ATS Scoring & Parser
-                  </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold font-display">
-                    Bypass Applicant Tracking Systems with Confidence
-                  </h3>
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-                    Upload your PDF or DOCX resume. Our parser evaluates keyword density,
-                    structural readability, quantified metrics, and suggests quantifiable bullet-point
-                    upgrades tailored to your target job title.
-                  </p>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-500 mt-0.5">
-                        <CheckCircle2 className="w-4 h-4" />
-                      </div>
-                      <span className="text-sm font-medium">Automatic skill extraction across languages, cloud platforms, and databases.</span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-500 mt-0.5">
-                        <CheckCircle2 className="w-4 h-4" />
-                      </div>
-                      <span className="text-sm font-medium">Clear breakdown of strengths, missing competencies, and weak phrasing.</span>
-                    </div>
-                  </div>
-                  <Link
-                    to="/resume"
-                    className="inline-flex items-center gap-2 text-primary font-bold hover:underline"
-                  >
-                    Try Resume Analyzer Now <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-                <div className="bg-background/90 rounded-2xl p-6 border border-border space-y-5 shadow-inner">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h4 className="font-bold text-base">ATS Compatibility Index</h4>
-                      <p className="text-xs text-muted-foreground">Frontend Engineer Target Profile</p>
-                    </div>
-                    <span className="text-3xl font-extrabold text-emerald-500">88%</span>
-                  </div>
-                  <div className="h-2.5 bg-muted rounded-full overflow-hidden">
-                    <div className="h-full bg-emerald-500 rounded-full" style={{ width: '88%' }} />
-                  </div>
-                  <div className="space-y-3 pt-2">
-                    <div className="p-3 rounded-xl bg-muted/40 text-xs space-y-1">
-                      <span className="font-bold text-foreground">Identified Core Strengths</span>
-                      <p className="text-muted-foreground">React 19, TypeScript, State Management, Vite, Component Architecture.</p>
-                    </div>
-                    <div className="p-3 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs space-y-1">
-                      <span className="font-bold text-amber-500">Recommended Additions</span>
-                      <p className="text-muted-foreground">Add specific metrics for performance optimization (e.g. "Reduced load times by 40%").</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
+            <div className="surface-card p-6 sm:p-8 rounded-xl border border-border space-y-3">
+              <span className="font-mono text-xs font-bold text-primary">02 / DRILL</span>
+              <h3 className="font-display font-bold text-base text-foreground">
+                Bridge Deficiencies & Practice Under Pressure
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Follow your verified milestone curriculum. Conduct timed technical interview rounds and refine answers with actionable STAR evaluation scoring.
+              </p>
+            </div>
 
-            {activeFeatureTab === 'interview' && (
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div className="space-y-6">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-emerald-500/10 text-emerald-500 text-xs font-bold">
-                    <Mic className="w-3.5 h-3.5" />
-                    Adaptive Mock Interviews
-                  </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold font-display">
-                    Simulate Technical & Behavioral Rounds
-                  </h3>
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-                    Practice realistic interviews under pressure with live countdown timers,
-                    comprehensive STAR-method feedback, and transparent scoring across clarity,
-                    relevance, and technical depth.
-                  </p>
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-3">
-                      <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-500 mt-0.5">
-                        <CheckCircle2 className="w-4 h-4" />
-                      </div>
-                      <span className="text-sm font-medium">Difficulty levels: Beginner, Intermediate, and Advanced.</span>
-                    </div>
-                    <div className="flex items-start gap-3">
-                      <div className="p-1 rounded-md bg-emerald-500/10 text-emerald-500 mt-0.5">
-                        <CheckCircle2 className="w-4 h-4" />
-                      </div>
-                      <span className="text-sm font-medium">Full post-interview evaluation report with sample ideal responses.</span>
-                    </div>
-                  </div>
-                  <Link
-                    to="/interview"
-                    className="inline-flex items-center gap-2 text-primary font-bold hover:underline"
-                  >
-                    Start an Interview Simulation <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-                <div className="bg-background/90 rounded-2xl p-6 border border-border space-y-4 shadow-inner">
-                  <div className="flex items-center justify-between border-b border-border/50 pb-3">
-                    <span className="text-xs font-bold text-primary uppercase tracking-wider">Question 2 of 5</span>
-                    <span className="px-2.5 py-0.5 rounded-full bg-primary/10 text-primary text-xs font-bold">Medium Difficulty</span>
-                  </div>
-                  <p className="text-sm font-semibold">"How do you handle state management across deeply nested components in modern React?"</p>
-                  <div className="p-3 rounded-xl bg-muted/40 text-xs space-y-2">
-                    <div className="flex justify-between font-bold">
-                      <span className="text-emerald-500">Answer Clarity: 92%</span>
-                      <span className="text-purple-500">Technical Depth: 86%</span>
-                    </div>
-                    <p className="text-muted-foreground italic">"Excellent explanation of Zustand vs Context API, with good trade-off consideration regarding re-renders."</p>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeFeatureTab === 'jobs' && (
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div className="space-y-6">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-purple-500/10 text-purple-500 text-xs font-bold">
-                    <Briefcase className="w-3.5 h-3.5" />
-                    Intelligent Job Matching
-                  </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold font-display">
-                    Discover Roles Aligned with Your Stack
-                  </h3>
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-                    Test your profile against curated, realistic positions or paste custom job descriptions.
-                    See exact matching percentages, overlap breakdown, and missing skills to prioritize before applying.
-                  </p>
-                  <Link
-                    to="/jobs"
-                    className="inline-flex items-center gap-2 text-primary font-bold hover:underline"
-                  >
-                    Match Your Skills <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-                <div className="bg-background/90 rounded-2xl p-6 border border-border space-y-4 shadow-inner">
-                  <div className="flex items-start justify-between">
-                    <div>
-                      <h4 className="font-bold text-base">Frontend Engineer (React / Next.js)</h4>
-                      <p className="text-xs text-muted-foreground">Vercel Ecosystem • Remote • $110k - $145k</p>
-                    </div>
-                    <span className="px-3 py-1 rounded-full bg-emerald-500/15 text-emerald-500 font-bold text-sm">92% Match</span>
-                  </div>
-                  <div className="space-y-2">
-                    <span className="text-xs text-muted-foreground font-semibold">Matched Skills (5/6)</span>
-                    <div className="flex flex-wrap gap-1.5">
-                      {['React', 'TypeScript', 'Tailwind CSS', 'HTML', 'CSS'].map(s => (
-                        <span key={s} className="px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 text-xs">{s}</span>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeFeatureTab === 'roadmap' && (
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div className="space-y-6">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-amber-500/10 text-amber-500 text-xs font-bold">
-                    <Map className="w-3.5 h-3.5" />
-                    Personalized Career Roadmaps
-                  </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold font-display">
-                    Structured Milestones from Zero to Senior
-                  </h3>
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-                    Generate step-by-step learning pathways with verified documentation links, project recommendations,
-                    and interactive checkbox tracking synced to your profile XP.
-                  </p>
-                  <Link
-                    to="/roadmap"
-                    className="inline-flex items-center gap-2 text-primary font-bold hover:underline"
-                  >
-                    Build Your Roadmap <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-                <div className="bg-background/90 rounded-2xl p-6 border border-border space-y-3 shadow-inner">
-                  <div className="flex items-center justify-between border-b border-border/50 pb-2">
-                    <span className="font-bold text-sm">Full Stack Developer Pathway</span>
-                    <span className="text-xs text-primary font-bold">60% Complete</span>
-                  </div>
-                  <div className="space-y-2 text-xs">
-                    <div className="flex items-center gap-2 text-emerald-400">
-                      <CheckCircle2 className="w-4 h-4" /> Phase 1: Core Fundamentals & TypeScript
-                    </div>
-                    <div className="flex items-center gap-2 text-emerald-400">
-                      <CheckCircle2 className="w-4 h-4" /> Phase 2: Relational Databases & REST Architecture
-                    </div>
-                    <div className="flex items-center gap-2 text-muted-foreground">
-                      <div className="w-4 h-4 rounded-full border border-border flex items-center justify-center text-[10px]">3</div>
-                      Phase 3: Microservices, Docker & CI/CD Pipelines
-                    </div>
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {activeFeatureTab === 'portfolio' && (
-              <div className="grid md:grid-cols-2 gap-8 items-center">
-                <div className="space-y-6">
-                  <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-pink-500/10 text-pink-500 text-xs font-bold">
-                    <Globe className="w-3.5 h-3.5" />
-                    Instant Developer Portfolio
-                  </div>
-                  <h3 className="text-2xl sm:text-3xl font-bold font-display">
-                    Publish a Live Showcase in Minutes
-                  </h3>
-                  <p className="text-muted-foreground text-sm sm:text-base leading-relaxed">
-                    Fill in your experience, projects, and skills to generate a stunning, responsive,
-                    accessible portfolio hosted at a custom slug with print and PDF export ready.
-                  </p>
-                  <Link
-                    to="/portfolio"
-                    className="inline-flex items-center gap-2 text-primary font-bold hover:underline"
-                  >
-                    Build Portfolio Now <ArrowRight className="w-4 h-4" />
-                  </Link>
-                </div>
-                <div className="bg-background/90 rounded-2xl p-6 border border-border space-y-4 shadow-inner">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-gradient-to-tr from-primary to-purple-600 flex items-center justify-center font-bold text-white text-lg">
-                      AD
-                    </div>
-                    <div>
-                      <h4 className="font-bold text-base">Alex Developer</h4>
-                      <p className="text-xs text-muted-foreground">Full Stack Software Engineer • San Francisco, CA</p>
-                    </div>
-                  </div>
-                  <p className="text-xs text-muted-foreground">"Specializing in high-performance web applications using React, Node.js, and PostgreSQL."</p>
-                  <div className="flex gap-2">
-                    <span className="px-2.5 py-1 rounded-md bg-muted text-[11px] font-medium">3 Featured Projects</span>
-                    <span className="px-2.5 py-1 rounded-md bg-muted text-[11px] font-medium">Shareable URL: /p/alex-dev</span>
-                  </div>
-                </div>
-              </div>
-            )}
+            <div className="surface-card p-6 sm:p-8 rounded-xl border border-border space-y-3">
+              <span className="font-mono text-xs font-bold text-primary">03 / SHOWCASE</span>
+              <h3 className="font-display font-bold text-base text-foreground">
+                Deploy Proof of Competence
+              </h3>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                Publish a recruiter-ready portfolio, link your projects, and apply directly to matching roles with maximum qualification alignment.
+              </p>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* Workflow Section */}
-      <section id="workflow" className="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 space-y-16">
-        <div className="text-center space-y-4 max-w-2xl mx-auto">
-          <h2 className="text-3xl sm:text-4xl font-extrabold font-display">
-            How CareerBoost AI Operates
+      {/* 7. Final Action & Minimal Footer */}
+      <section className="py-20 border-t border-border bg-card">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-6">
+          <span className="accent-badge text-primary font-bold">Take Command</span>
+          <h2 className="text-3xl sm:text-4xl font-extrabold font-display text-foreground">
+            Start structuring your engineering career today.
           </h2>
-          <p className="text-muted-foreground text-base">
-            A frictionless three-stage cycle that converts your skills into hireable momentum.
+          <p className="text-sm sm:text-base text-muted-foreground max-w-xl mx-auto">
+            Zero fluff, no credit card required. Run a resume diagnostic or take a mock interview round in under three minutes.
           </p>
-        </div>
 
-        <div className="grid md:grid-cols-3 gap-8">
-          <div className="glass-panel rounded-2xl p-8 space-y-4 border border-border relative">
-            <div className="w-12 h-12 rounded-2xl bg-blue-500/10 text-blue-500 flex items-center justify-center font-bold text-lg font-display">
-              01
-            </div>
-            <h3 className="text-xl font-bold font-display">Audit & Benchmark</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Upload your existing resume or paste your bio. Discover your baseline ATS score,
-              highlighted strengths, and specific skill omissions across modern hiring criteria.
-            </p>
-          </div>
-
-          <div className="glass-panel rounded-2xl p-8 space-y-4 border border-border relative">
-            <div className="w-12 h-12 rounded-2xl bg-purple-500/10 text-purple-500 flex items-center justify-center font-bold text-lg font-display">
-              02
-            </div>
-            <h3 className="text-xl font-bold font-display">Train & Level Up</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Take tailored mock interview rounds. Receive instant evaluative scoring on communication,
-              role-specific nuance, and technical accuracy to eliminate blind spots.
-            </p>
-          </div>
-
-          <div className="glass-panel rounded-2xl p-8 space-y-4 border border-border relative">
-            <div className="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-500 flex items-center justify-center font-bold text-lg font-display">
-              03
-            </div>
-            <h3 className="text-xl font-bold font-display">Showcase & Match</h3>
-            <p className="text-muted-foreground text-sm leading-relaxed">
-              Generate an elegant live developer portfolio with your verified projects and experience,
-              and apply directly to jobs matching your exact qualifications.
-            </p>
-          </div>
-        </div>
-      </section>
-
-      {/* Outcome Proof & Metrics */}
-      <section id="outcomes" className="py-16 border-t border-border/40 bg-muted/10">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 text-center">
-            <div className="space-y-2">
-              <div className="text-4xl font-extrabold font-display gradient-text">85%+</div>
-              <p className="text-xs sm:text-sm text-muted-foreground">Average ATS Score Improvement</p>
-            </div>
-            <div className="space-y-2">
-              <div className="text-4xl font-extrabold font-display text-emerald-500">2.4x</div>
-              <p className="text-xs sm:text-sm text-muted-foreground">More Interview Callbacks</p>
-            </div>
-            <div className="space-y-2">
-              <div className="text-4xl font-extrabold font-display text-purple-500">5+ Roles</div>
-              <p className="text-xs sm:text-sm text-muted-foreground">Supported Engineering Tracks</p>
-            </div>
-            <div className="space-y-2">
-              <div className="text-4xl font-extrabold font-display text-pink-500">100%</div>
-              <p className="text-xs sm:text-sm text-muted-foreground">User-Owned Private Data</p>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Final CTA Banner */}
-      <section className="py-20 relative overflow-hidden">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 text-center space-y-8 glass-panel rounded-3xl p-10 sm:p-14 border border-primary/20 shadow-2xl relative">
-          <div className="w-16 h-16 rounded-2xl bg-primary/10 text-primary flex items-center justify-center mx-auto mb-2">
-            <Zap className="w-8 h-8" />
-          </div>
-          <h2 className="text-3xl sm:text-5xl font-extrabold font-display">
-            Ready to Take Control of Your Career?
-          </h2>
-          <p className="text-muted-foreground text-base sm:text-lg max-w-xl mx-auto">
-            Join software engineers, data analysts, and tech switchers actively using CareerBoost AI to interview better and land competitive jobs.
-          </p>
-          <div className="flex flex-col sm:flex-row items-center justify-center gap-4 pt-2">
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3 pt-2">
             <Link
               to="/auth?mode=signup"
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-primary text-white font-bold text-base shadow-xl shadow-primary/25 hover:bg-primary/90 transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg bg-primary text-primary-foreground font-semibold text-xs shadow-xs hover:bg-primary/90 transition-all"
             >
               Get Started for Free
-              <ArrowRight className="w-5 h-5" />
+              <ArrowRight className="w-3.5 h-3.5" />
             </Link>
             <button
+              type="button"
               onClick={handleDemoLaunch}
-              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-4 rounded-xl bg-secondary text-secondary-foreground font-bold text-base hover:bg-secondary/80 transition-all"
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-lg border border-border text-foreground font-semibold text-xs hover:bg-muted transition-colors cursor-pointer"
             >
-              Launch Live Demo Sandbox
+              <Play className="w-3 h-3 text-primary fill-primary" />
+              Launch Instant Demo
             </button>
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-border py-12 mt-auto bg-card/40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-6">
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center text-white font-bold">
-              <Briefcase className="w-4 h-4" />
+      <footer className="border-t border-border py-8 bg-background">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-2">
+            <div className="w-6 h-6 rounded-md bg-primary flex items-center justify-center text-primary-foreground">
+              <Briefcase className="w-3 h-3" />
             </div>
-            <span className="font-bold text-lg font-display">CareerBoost AI</span>
+            <span className="font-display font-bold text-sm text-foreground">CareerBoost AI</span>
+            <span className="text-xs text-muted-foreground font-mono ml-2">© {new Date().getFullYear()}</span>
           </div>
-          <p className="text-xs text-muted-foreground">
-            © {new Date().getFullYear()} CareerBoost AI. Built with React 19, TypeScript, and Supabase.
-          </p>
-          <div className="flex items-center gap-6 text-xs text-muted-foreground">
-            <Link to="/auth" className="hover:text-foreground transition-colors">Sign In</Link>
+
+          <div className="flex items-center gap-6 text-xs text-muted-foreground font-mono">
             <Link to="/resume" className="hover:text-foreground transition-colors">Resume Analyzer</Link>
-            <Link to="/interview" className="hover:text-foreground transition-colors">Mock Interviews</Link>
+            <Link to="/interview" className="hover:text-foreground transition-colors">Mock Simulator</Link>
+            <Link to="/jobs" className="hover:text-foreground transition-colors">Job Matcher</Link>
+            <Link to="/roadmap" className="hover:text-foreground transition-colors">Career Roadmap</Link>
+            <Link to="/portfolio" className="hover:text-foreground transition-colors">Portfolio Builder</Link>
           </div>
         </div>
       </footer>
