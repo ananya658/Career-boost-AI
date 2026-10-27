@@ -1,21 +1,34 @@
 import { useEffect, useMemo, useState } from 'react';
-import { CheckCircle2, Circle, Loader2, Map, Target } from 'lucide-react';
-import { motion } from 'framer-motion';
+import {
+  CheckCircle2,
+  Circle,
+  Loader2,
+  Target,
+  Sparkles,
+  ExternalLink,
+  BookOpen,
+  Code2,
+  Plus,
+  X
+} from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { generateRoadmap, roadmaps, type RoadmapStep } from '../lib/roadmapData';
-import { getUserProfile, getUserProgress, mergeUniqueSkills, upsertUserProgress } from '../lib/database';
+import {
+  getUserProfile,
+  getUserProgress,
+  mergeUniqueSkills,
+  upsertUserProgress,
+  awardXp
+} from '../lib/database';
 
 interface GeneratedRoadmap {
   id: string;
   goal: string;
+  level: string;
   matchPercentage: number;
   missingSkills: string[];
   steps: RoadmapStep[];
   createdAt: string;
-}
-
-function storageKey(userId: string): string {
-  return `generated_roadmaps_${userId}`;
 }
 
 export default function RoadmapGenerator() {
@@ -25,18 +38,22 @@ export default function RoadmapGenerator() {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const [targetRole, setTargetRole] = useState('Frontend Developer');
+  const [targetRole, setTargetRole] = useState('Full Stack Developer');
+  const [skillLevel, setSkillLevel] = useState<'beginner' | 'intermediate' | 'advanced'>('intermediate');
+  const [careerGoal, setCareerGoal] = useState('Land a High-Growth Mid/Senior Engineering Offer');
   const [skillInput, setSkillInput] = useState('');
   const [userSkills, setUserSkills] = useState<string[]>([]);
   const [completedSkills, setCompletedSkills] = useState<string[]>([]);
-  const [generated, setGenerated] = useState<GeneratedRoadmap[]>([]);
+  const [activeRoadmap, setActiveRoadmap] = useState<GeneratedRoadmap | null>(null);
 
   const roleOptions = useMemo(() => Object.keys(roadmaps), []);
 
   useEffect(() => {
+    let isMounted = true;
+
     const loadData = async () => {
       if (!user) {
-        setLoading(false);
+        if (isMounted) setLoading(false);
         return;
       }
 
@@ -46,34 +63,50 @@ export default function RoadmapGenerator() {
           getUserProgress(user.id),
         ]);
 
-        setUserSkills(profile?.skills ?? []);
-        setCompletedSkills(progress?.completed_skills ?? []);
+        if (isMounted) {
+          const loadedSkills = profile?.skills?.length
+            ? profile.skills
+            : ['React', 'TypeScript', 'JavaScript'];
+          const completed = progress?.completed_skills ?? [];
 
-        const stored = localStorage.getItem(storageKey(user.id));
-        if (stored) {
-          setGenerated(JSON.parse(stored) as GeneratedRoadmap[]);
+          setUserSkills(loadedSkills);
+          setCompletedSkills(completed);
+
+          // Generate initial roadmap
+          const generated = generateRoadmap(targetRole, loadedSkills, completed);
+          setActiveRoadmap({
+            id: `roadmap-${Date.now()}`,
+            goal: targetRole,
+            level: skillLevel,
+            matchPercentage: generated.matchPercentage,
+            missingSkills: generated.missingSkills,
+            steps: generated.steps,
+            createdAt: new Date().toISOString(),
+          });
         }
       } catch (loadError) {
         console.error(loadError);
-        setError('Failed to load roadmap data.');
       } finally {
-        setLoading(false);
+        if (isMounted) setLoading(false);
       }
     };
 
     void loadData();
-  }, [user]);
+
+    return () => {
+      isMounted = false;
+    };
+  }, [user, targetRole, skillLevel]);
 
   const addSkill = () => {
     const value = skillInput.trim();
     if (!value) return;
-
     setUserSkills((prev) => mergeUniqueSkills(prev, [value]));
     setSkillInput('');
   };
 
   const removeSkill = (skillToRemove: string) => {
-    setUserSkills((prev) => prev.filter((skill) => skill.toLowerCase() !== skillToRemove.toLowerCase()));
+    setUserSkills((prev) => prev.filter((s) => s.toLowerCase() !== skillToRemove.toLowerCase()));
   };
 
   const generate = async () => {
@@ -87,154 +120,346 @@ export default function RoadmapGenerator() {
       const entry: GeneratedRoadmap = {
         id: `roadmap-${Date.now()}`,
         goal: targetRole,
+        level: skillLevel,
         matchPercentage: roadmap.matchPercentage,
         missingSkills: roadmap.missingSkills,
         steps: roadmap.steps,
         createdAt: new Date().toISOString(),
       };
 
-      const updated = [entry, ...generated].slice(0, 15);
-      setGenerated(updated);
-      localStorage.setItem(storageKey(user.id), JSON.stringify(updated));
-    } catch (generateError) {
-      console.error(generateError);
+      setActiveRoadmap(entry);
+      localStorage.setItem(`roadmap_${user.id}`, JSON.stringify(entry));
+      await awardXp(user.id, 30);
+    } catch {
       setError('Could not generate roadmap.');
     } finally {
       setGenerating(false);
     }
   };
 
-  const toggleStep = async (roadmapId: string, stepIndex: number) => {
-    if (!user) return;
+  const toggleStep = async (stepId: string) => {
+    if (!user || !activeRoadmap) return;
 
-    const updatedRoadmaps = generated.map((roadmap) => {
-      if (roadmap.id !== roadmapId) return roadmap;
-      const steps = roadmap.steps.map((step, index) =>
-        index === stepIndex ? { ...step, completed: !step.completed } : step,
-      );
-      return { ...roadmap, steps };
+    let toggledSkill: string | undefined;
+
+    const updatedSteps = activeRoadmap.steps.map((step) => {
+      if (step.id === stepId) {
+        const nextCompleted = !step.completed;
+        if (nextCompleted && step.relatedSkill) {
+          toggledSkill = step.relatedSkill;
+        }
+        return { ...step, completed: nextCompleted };
+      }
+      return step;
     });
 
-    setGenerated(updatedRoadmaps);
-    localStorage.setItem(storageKey(user.id), JSON.stringify(updatedRoadmaps));
+    const updatedRoadmap = { ...activeRoadmap, steps: updatedSteps };
+    setActiveRoadmap(updatedRoadmap);
+    localStorage.setItem(`roadmap_${user.id}`, JSON.stringify(updatedRoadmap));
 
-    const newlyCompletedSkills = updatedRoadmaps
-      .flatMap((roadmap) => roadmap.steps)
-      .filter((step) => step.completed && step.relatedSkill)
-      .map((step) => step.relatedSkill as string);
-
-    const mergedCompleted = mergeUniqueSkills(completedSkills, newlyCompletedSkills);
-    setCompletedSkills(mergedCompleted);
-
-    try {
-      await upsertUserProgress({ user_id: user.id, completed_skills: mergedCompleted });
-    } catch (error) {
-      console.error(error);
+    if (toggledSkill) {
+      const merged = mergeUniqueSkills(completedSkills, [toggledSkill]);
+      setCompletedSkills(merged);
+      await upsertUserProgress({ user_id: user.id, completed_skills: merged });
+      await awardXp(user.id, 50);
     }
   };
 
+  const completedCount = activeRoadmap?.steps.filter((s) => s.completed).length || 0;
+  const totalCount = activeRoadmap?.steps.length || 1;
+  const progressPercent = Math.round((completedCount / totalCount) * 100);
+
+  // Group steps by Phase
+  const stepsByPhase = useMemo(() => {
+    if (!activeRoadmap) return {};
+    const grouped: Record<string, RoadmapStep[]> = {};
+    for (const step of activeRoadmap.steps) {
+      if (!grouped[step.phase]) grouped[step.phase] = [];
+      grouped[step.phase].push(step);
+    }
+    return grouped;
+  }, [activeRoadmap]);
+
   if (loading) {
     return (
-      <div className="flex justify-center p-12">
+      <div className="flex justify-center items-center py-24">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 pb-12 max-w-6xl mx-auto">
+      {/* Header */}
       <div>
-        <h1 className="text-3xl font-bold">Career Roadmap Generator</h1>
-        <p className="text-muted-foreground mt-2">Compare your current skills with target role requirements and plan next steps.</p>
+        <h1 className="text-3xl font-extrabold font-display text-foreground">Personalized Career Roadmap</h1>
+        <p className="text-sm text-muted-foreground mt-1">
+          Structured phase-by-phase learning curriculum, practice projects, and verified engineering docs to reach your target role.
+        </p>
       </div>
 
-      <div className="glass-panel rounded-2xl p-6 space-y-5">
-        <div>
-          <label className="block text-sm font-medium mb-2">Target Role</label>
-          <select value={targetRole} onChange={(event) => setTargetRole(event.target.value)} className="w-full rounded-xl border border-border bg-background p-3 outline-none focus:ring-2 focus:ring-primary">
-            {roleOptions.map((role) => <option key={role} value={role}>{role}</option>)}
-          </select>
-        </div>
+      <div className="grid lg:grid-cols-12 gap-8 items-start">
+        {/* Left Column: Configuration Settings */}
+        <div className="lg:col-span-4 space-y-6">
+          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-border space-y-5">
+            <h2 className="text-base font-bold font-display text-foreground flex items-center gap-2">
+              <Target className="w-4 h-4 text-primary" />
+              Target Role & Objectives
+            </h2>
 
-        <div>
-          <label className="block text-sm font-medium mb-2">Current Skills</label>
-          <div className="flex gap-2">
-            <input
-              value={skillInput}
-              onChange={(event) => setSkillInput(event.target.value)}
-              onKeyDown={(event) => {
-                if (event.key === 'Enter') {
-                  event.preventDefault();
-                  addSkill();
-                }
-              }}
-              placeholder="Add skill"
-              className="flex-1 rounded-xl border border-border bg-background p-3 outline-none focus:ring-2 focus:ring-primary"
-            />
-            <button type="button" onClick={addSkill} className="rounded-xl bg-secondary px-4 hover:bg-secondary/80">Add</button>
-          </div>
-
-          {userSkills.length > 0 && (
-            <div className="mt-3 flex flex-wrap gap-2">
-              {userSkills.map((skill) => (
-                <button key={skill} type="button" onClick={() => removeSkill(skill)} className="rounded-full bg-primary/10 px-3 py-1 text-xs text-primary hover:bg-primary/20">
-                  {skill} x
-                </button>
-              ))}
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                Target Engineering Role
+              </label>
+              <select
+                value={targetRole}
+                onChange={(e) => setTargetRole(e.target.value)}
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs font-medium outline-none focus:ring-2 focus:ring-primary"
+              >
+                {roleOptions.map((role) => (
+                  <option key={role} value={role}>{role}</option>
+                ))}
+              </select>
             </div>
-          )}
-        </div>
 
-        {error && <p className="text-sm text-red-300">{error}</p>}
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                Starting Skill Level
+              </label>
+              <div className="grid grid-cols-3 gap-1.5">
+                {(['beginner', 'intermediate', 'advanced'] as const).map((lvl) => (
+                  <button
+                    key={lvl}
+                    type="button"
+                    onClick={() => setSkillLevel(lvl)}
+                    className={`py-2 rounded-lg text-xs font-bold capitalize transition-all border ${
+                      skillLevel === lvl
+                        ? 'bg-primary text-white border-primary shadow-sm'
+                        : 'bg-card border-border hover:bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    {lvl}
+                  </button>
+                ))}
+              </div>
+            </div>
 
-        <button type="button" onClick={generate} disabled={generating} className="w-full rounded-xl bg-primary py-3 font-semibold text-primary-foreground hover:bg-primary/90 disabled:opacity-50 inline-flex justify-center items-center gap-2">
-          {generating ? <Loader2 className="h-4 w-4 animate-spin" /> : <Map className="h-4 w-4" />}
-          Generate Roadmap
-        </button>
-      </div>
+            <div>
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider mb-1.5">
+                Primary Career Goal
+              </label>
+              <input
+                type="text"
+                value={careerGoal}
+                onChange={(e) => setCareerGoal(e.target.value)}
+                placeholder="e.g. Land a Senior Frontend Role at a Series-B Startup"
+                className="w-full rounded-xl border border-border bg-background px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-primary"
+              />
+            </div>
 
-      <div className="space-y-5">
-        {generated.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-border p-10 text-center text-muted-foreground">Generate your first roadmap to get started.</div>
-        ) : (
-          generated.map((entry, index) => (
-            <motion.div key={entry.id} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: index * 0.04 }} className="glass-panel rounded-2xl p-6 space-y-5">
-              <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3">
-                <div>
-                  <h2 className="text-xl font-semibold inline-flex items-center gap-2"><Target className="h-5 w-5 text-primary" />{entry.goal}</h2>
-                  <p className="text-xs text-muted-foreground mt-1">Generated {new Date(entry.createdAt).toLocaleString()}</p>
-                </div>
-                <div className="rounded-full bg-primary/10 px-3 py-1 text-sm font-semibold text-primary">Match {entry.matchPercentage}%</div>
+            {/* Skills Pool */}
+            <div className="space-y-2">
+              <label className="block text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                Your Existing Skills ({userSkills.length})
+              </label>
+              <div className="flex gap-2">
+                <input
+                  value={skillInput}
+                  onChange={(e) => setSkillInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === 'Enter') {
+                      e.preventDefault();
+                      addSkill();
+                    }
+                  }}
+                  placeholder="Add skill (e.g. Next.js)"
+                  className="flex-1 rounded-xl border border-border bg-background px-3 py-1.5 text-xs outline-none"
+                />
+                <button
+                  type="button"
+                  onClick={addSkill}
+                  className="px-3 py-1.5 rounded-xl bg-secondary text-xs font-bold hover:bg-secondary/80"
+                >
+                  <Plus className="w-3.5 h-3.5" />
+                </button>
               </div>
 
-              {entry.missingSkills.length > 0 && (
-                <div>
-                  <p className="text-sm font-medium mb-2">Missing Skills</p>
-                  <div className="flex flex-wrap gap-2">
-                    {entry.missingSkills.map((skill) => (
-                      <span key={skill} className="rounded-full bg-red-500/10 px-3 py-1 text-xs text-red-300">{skill}</span>
+              <div className="flex flex-wrap gap-1.5 max-h-36 overflow-y-auto pt-1">
+                {userSkills.map((s) => (
+                  <span
+                    key={s}
+                    className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md bg-primary/10 text-primary text-[11px] font-semibold"
+                  >
+                    {s}
+                    <button type="button" onClick={() => removeSkill(s)}>
+                      <X className="w-3 h-3 hover:text-destructive" />
+                    </button>
+                  </span>
+                ))}
+              </div>
+            </div>
+
+            {error && (
+              <p className="text-xs text-destructive">{error}</p>
+            )}
+
+            <button
+              type="button"
+              disabled={generating}
+              onClick={generate}
+              className="w-full py-3 rounded-xl bg-primary text-white font-bold text-xs shadow-lg shadow-primary/25 hover:bg-primary/90 disabled:opacity-50 flex items-center justify-center gap-2 transition-all"
+            >
+              {generating ? <Loader2 className="w-4 h-4 animate-spin" /> : <Sparkles className="w-4 h-4" />}
+              Regenerate Roadmap
+            </button>
+          </div>
+
+          {/* Skill Gap Summary Card */}
+          {activeRoadmap && (
+            <div className="glass-panel rounded-3xl p-6 border border-border space-y-3">
+              <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+                Priority Skill Gap Analysis
+              </h3>
+              <div className="space-y-2">
+                <div className="flex justify-between items-center text-xs">
+                  <span>Stack Coverage</span>
+                  <span className="font-bold text-primary">{activeRoadmap.matchPercentage}%</span>
+                </div>
+                <div className="h-2 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-primary rounded-full"
+                    style={{ width: `${activeRoadmap.matchPercentage}%` }}
+                  />
+                </div>
+              </div>
+
+              {activeRoadmap.missingSkills.length > 0 && (
+                <div className="pt-2">
+                  <span className="text-[11px] text-muted-foreground block mb-1 font-semibold">
+                    Recommended Technologies to Acquire:
+                  </span>
+                  <div className="flex flex-wrap gap-1.5">
+                    {activeRoadmap.missingSkills.map((skill) => (
+                      <span key={skill} className="px-2 py-0.5 rounded bg-rose-500/10 text-rose-400 text-xs font-semibold">
+                        {skill}
+                      </span>
                     ))}
                   </div>
                 </div>
               )}
+            </div>
+          )}
+        </div>
 
-              <div className="space-y-3">
-                {entry.steps.map((step, stepIndex) => (
-                  <button key={`${entry.id}-${step.title}`} type="button" onClick={() => void toggleStep(entry.id, stepIndex)} className="w-full rounded-xl border border-border bg-background/40 p-3 text-left hover:border-primary/40">
-                    <div className="flex items-start gap-3">
-                      {step.completed ? <CheckCircle2 className="h-5 w-5 text-green-400 mt-0.5" /> : <Circle className="h-5 w-5 text-muted-foreground mt-0.5" />}
-                      <div>
-                        <p className="font-medium">{step.title}</p>
-                        <p className="text-sm text-muted-foreground">{step.description}</p>
-                        <p className="mt-1 text-xs uppercase tracking-wide text-muted-foreground">{step.level}</p>
-                      </div>
-                    </div>
-                  </button>
-                ))}
+        {/* Right Column: Roadmap Progression & Phases */}
+        <div className="lg:col-span-8 space-y-6">
+          {/* Progress Overview Header */}
+          <div className="glass-panel rounded-3xl p-6 sm:p-7 border border-border flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <span className="text-xs font-bold text-primary uppercase tracking-wider">Curriculum Path</span>
+              <h2 className="text-xl sm:text-2xl font-bold font-display text-foreground">{targetRole} Pathway</h2>
+              <p className="text-xs text-muted-foreground mt-0.5">{careerGoal}</p>
+            </div>
+
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <span className="text-2xl font-extrabold font-display text-emerald-500">
+                  {completedCount} / {totalCount}
+                </span>
+                <p className="text-[11px] text-muted-foreground font-semibold">Milestones Complete ({progressPercent}%)</p>
               </div>
-            </motion.div>
-          ))
-        )}
+            </div>
+          </div>
+
+          {/* Phased Roadmap Timeline */}
+          <div className="space-y-8">
+            {Object.entries(stepsByPhase).map(([phaseName, phaseSteps], phaseIdx) => (
+              <div key={phaseName} className="space-y-4">
+                <div className="flex items-center gap-2.5">
+                  <span className="w-7 h-7 rounded-lg bg-primary/10 text-primary text-xs font-bold flex items-center justify-center font-display">
+                    0{phaseIdx + 1}
+                  </span>
+                  <h3 className="text-base font-bold font-display text-foreground">{phaseName}</h3>
+                </div>
+
+                <div className="space-y-4 pl-3.5 border-l-2 border-border/70 ml-3.5">
+                  {phaseSteps.map((step) => (
+                    <div
+                      key={step.id}
+                      className={`p-5 rounded-2xl border transition-all space-y-3 ${
+                        step.completed
+                          ? 'bg-emerald-500/5 border-emerald-500/30'
+                          : 'glass-panel border-border/80'
+                      }`}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex items-start gap-3">
+                          <button
+                            type="button"
+                            onClick={() => toggleStep(step.id)}
+                            className="mt-0.5 text-primary hover:opacity-80 transition-opacity shrink-0"
+                            title={step.completed ? 'Mark incomplete' : 'Mark milestone complete (+50 XP)'}
+                          >
+                            {step.completed ? (
+                              <CheckCircle2 className="w-5 h-5 text-emerald-500 fill-emerald-500/20" />
+                            ) : (
+                              <Circle className="w-5 h-5 text-muted-foreground" />
+                            )}
+                          </button>
+
+                          <div>
+                            <h4 className={`text-sm font-bold ${step.completed ? 'line-through text-muted-foreground' : 'text-foreground'}`}>
+                              {step.title}
+                            </h4>
+                            <p className="text-xs text-muted-foreground mt-1 leading-relaxed">
+                              {step.description}
+                            </p>
+                          </div>
+                        </div>
+
+                        <span className="text-[11px] font-bold capitalize px-2 py-0.5 rounded-md bg-muted text-muted-foreground shrink-0">
+                          {step.level}
+                        </span>
+                      </div>
+
+                      {/* Practice Project Recommendation */}
+                      {step.projectIdea && (
+                        <div className="p-3 rounded-xl bg-muted/40 border border-border/50 text-xs flex items-start gap-2">
+                          <Code2 className="w-4 h-4 text-purple-400 shrink-0 mt-0.5" />
+                          <div>
+                            <span className="font-bold text-foreground">Recommended Proof Project: </span>
+                            <span className="text-muted-foreground">{step.projectIdea}</span>
+                          </div>
+                        </div>
+                      )}
+
+                      {/* Verified Resources Links */}
+                      {step.resources && step.resources.length > 0 && (
+                        <div className="flex flex-wrap items-center gap-3 pt-1 text-xs">
+                          <span className="text-muted-foreground font-semibold flex items-center gap-1">
+                            <BookOpen className="w-3.5 h-3.5 text-primary" /> Verified Docs:
+                          </span>
+                          {step.resources.map((res, i) => (
+                            <a
+                              key={i}
+                              href={res.url}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="inline-flex items-center gap-1 text-primary hover:underline font-medium"
+                            >
+                              {res.name}
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );

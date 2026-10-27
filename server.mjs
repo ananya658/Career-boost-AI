@@ -67,64 +67,23 @@ function enhanceResponse(res) {
   };
 }
 
-async function readRawBody(req) {
-  const chunks = [];
-
-  for await (const chunk of req) {
-    chunks.push(typeof chunk === 'string' ? Buffer.from(chunk) : chunk);
-  }
-
-  return Buffer.concat(chunks);
-}
-
-function shouldParseBody(req, contentType) {
-  if (!req.method || ['GET', 'HEAD'].includes(req.method)) return false;
-  if (!contentType) return true;
-  return !contentType.includes('multipart/form-data');
-}
-
-async function loadApiModule(routeName) {
-  const filePath = path.resolve(root, 'api', `${routeName}.js`);
+async function loadFunctionsHandler() {
+  const filePath = path.resolve(root, 'api', 'functions.js');
   const moduleUrl = `${pathToFileURL(filePath).href}?t=${Date.now()}`;
-  return import(moduleUrl);
+  const mod = await import(moduleUrl);
+  return mod.default;
 }
 
 async function handleApi(req, res) {
-  const url = new URL(req.url || '/', 'http://localhost');
-  const routeName = path.basename(url.pathname);
-
-  if (!routeName || routeName.includes('..')) {
-    res.status(404).json({ error: 'Not found' });
-    return;
-  }
-
   try {
-    const mod = await loadApiModule(routeName);
-    const handler = mod.default;
-
+    const handler = await loadFunctionsHandler();
     if (typeof handler !== 'function') {
-      res.status(500).json({ error: `API handler for /api/${routeName} is invalid` });
+      res.status(500).json({ error: 'API router is not a function' });
       return;
     }
-
-    req.query = Object.fromEntries(url.searchParams.entries());
-
-    const contentType = String(req.headers['content-type'] || '');
-    if (shouldParseBody(req, contentType)) {
-      const rawBody = await readRawBody(req);
-
-      if (contentType.includes('application/json')) {
-        req.body = rawBody.length ? JSON.parse(rawBody.toString('utf8')) : {};
-      } else if (contentType.includes('application/x-www-form-urlencoded')) {
-        req.body = Object.fromEntries(new URLSearchParams(rawBody.toString('utf8')));
-      } else {
-        req.body = rawBody;
-      }
-    }
-
     await handler(req, res);
   } catch (error) {
-    console.error(`API error for /api/${routeName}:`, error);
+    console.error('API Error:', error);
     if (!res.headersSent) {
       res.status(500).json({ error: error.message || 'Internal server error' });
     } else {
@@ -167,5 +126,5 @@ const server = http.createServer(async (req, res) => {
 
 const port = Number(process.env.PORT || 5173);
 server.listen(port, () => {
-  console.log(`Dev server running at http://localhost:${port}`);
+  console.log(`CareerBoost dev server running at http://localhost:${port}`);
 });
